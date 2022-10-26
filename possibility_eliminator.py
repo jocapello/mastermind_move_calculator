@@ -16,7 +16,7 @@ def elim_poss(poss, guess, w, r, N_COLORS, POSITIONS):
     poss_list = list(poss)
     new_poss = []
     for code in poss_list:
-        r2, w2, R2, W2 = game.apply_guess(code, guess, N_COLORS, POSITIONS)
+        r2, w2 = game.apply_guess(code, guess, N_COLORS, POSITIONS)
         if (r, w) == (r2, w2):
             new_poss.append(code)
     return set(new_poss)
@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
     while guess != code:
         
-        r, w, R, W = game.apply_guess(code, guess, N_COLORS, POSITIONS)
+        r, w = game.apply_guess(code, guess, N_COLORS, POSITIONS)
         print("incorrect guess, you got {} red pegs and {} white pegs.\n".format(str(r), str(w)))
         possible = elim_poss(possible, guess, w, r, N_COLORS, POSITIONS)
         print(possible)
