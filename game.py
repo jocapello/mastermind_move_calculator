@@ -33,7 +33,7 @@ def list_total(code, guess, R, W, N_COLORS, POSITIONS):
 def apply_guess(code, guess, N_COLORS, POSITIONS):
     G = [lambda c, guess = guess, i = i: check_c(i, c, guess) for i in range(POSITIONS)]
     C = [lambda c, code = code, i = i: check_c(i, c, code) for i in range(POSITIONS)]
-    red_pegs = [True in [C[t](c) and G[t](c) for c in range(1,7)] for t in range(POSITIONS)]   
+    red_pegs = [True in [C[t](c) and G[t](c) for c in range(N_COLORS)] for t in range(POSITIONS)]   
     R = red_pegs
     # print(red_pegs)
 
