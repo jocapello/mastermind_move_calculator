@@ -72,8 +72,8 @@ if __name__ == "__main__":
         r, w = game.apply_guess(code, guess, N_COLORS, POSITIONS)
         print("incorrect guess, you got {} red pegs and {} white pegs.\n".format(str(r), str(w)))
         possible = possibility_eliminator.elim_poss(possible, guess, w, r, N_COLORS, POSITIONS)
-        guess_stats = get_tot_elim(possible, N_COLORS, POSITIONS)
-        ranked = rank_guesses(possible, guess_stats, reverse=False, prio=1)
+        guess_stats = get_guess_elim(possible, N_COLORS, POSITIONS)
+        ranked = rank_guesses(possible, guess_stats, reverse=True, prio=0)
         print(ranked[0])
         print(guess_stats[ranked[0]], guess_stats[ranked[-1]])
         
