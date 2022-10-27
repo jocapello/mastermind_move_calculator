@@ -55,8 +55,8 @@ class Peg(Unique):
 @proposition(E)
 class Row(Unique):
     def __init__(self, items: list, pegs: list):
-        self.items = [Item(items[0], i) for i in range(len(items))]
-        self.pegs = [Peg(items[0], i) for i in range(len(items))]
+        self.items = [Item(items[i], i) for i in range(len(items))]
+        self.pegs = [Peg(pegs[i], i) for i in range(len(pegs))]
 
     def __str__(self):
         return f"ROWS-{[it for it in self.items]}"
@@ -69,7 +69,7 @@ class Board(Unique):
         self.rows = rows
 
     def __str__(self):
-        return f"**Board**:\n{[row for row in self.rows]}"
+        return f"B:{[row for row in self.rows]}"
 
 
 # Define the 4 locations to be iterated over
@@ -111,7 +111,7 @@ for i in range(PEGS_LENGTH):
     loc1 += 1
     loc2 = 0
 
-print(pegs_colours)
+# print(pegs_colours)
 
 # Create all of the possible row states by combining the boards and the pegs
 all_rows = []
@@ -119,37 +119,14 @@ for item_row in item_colours:
     for peg_row in pegs_colours:
         all_rows.append(Row(item_row, peg_row))
 
-
-print(all_rows)
-
-# To create propositions, create classes for them first, annotated with "@proposition" and the Encoding
-# @proposition(E)
-# class BasicPropositions:
-#     def __init__(self, data):
-#         self.data = data
-
-#     def __repr__(self):
-#         return f"A.{self.data}"
+# print(all_rows)
 
 
-# Different classes for propositions are useful because this allows for more dynamic constraint creation
-# for propositions within that class. For example, you can enforce that "at least one" of the propositions
-# that are instances of this class must be true by using a @constraint decorator.
-# other options include: at most one, exactly one, at most k, and implies all.
-# For a complete module reference, see https://bauhaus.readthedocs.io/en/latest/bauhaus.html
-# @constraint.at_least_one(E)
-# @proposition(E)
-# class FancyPropositions:
-#     def __init__(self, data):
-#         self.data = data
+g1 = Board([Row(["red", "red", "red", "red"], ["blank", "blank", "blank", "blank"])])
+ans1 = Board(
+    [Row(["green", "red", "red", "red"], ["blank", "blank", "blank", "blank"])]
+)
 
-#     def __repr__(self):
-#         return f"A.{self.data}"
-
-
-# Call your variables whatever you want
-g1 = BasicBoardPropositions("red", "red", "red", "red")
-ans1 = BasicBoardPropositions("red", "red", "red", "red")
 # At least one of these will be true
 # x = FancyPropositions("x")
 # y = FancyPropositions("y")
