@@ -1,14 +1,53 @@
-
 from bauhaus import Encoding, proposition, constraint
 from bauhaus.utils import count_solutions, likelihood
 
 # Encoding that will store all of your constraints
 E = Encoding()
 
+COLOURS = ["red", "green", "blue", "purple", "yellow", "white"]
+COLOURS_LENGTH = len(COLOURS)
+GUESS_LOCATIONS = 4
+
+PROPOSITIONS = []
+
+
+class Unique(object):
+    def __hash__(self):
+        return hash(str(self))
+
+
+@proposition(E)
+class BasicBoardPropositions(Unique):
+    def __init__(self, loc1, loc2, loc3, loc4):
+        self.colours = [COLOURS[loc1], COLOURS[loc2], COLOURS[loc3], COLOURS[loc4]]
+
+    def __repr__(self):
+        return f"0: {self.colours[0]} 1: {self.colours[1]} 2: {self.colours[2]} 3: {self.colours[3]}\n"
+
+
+# Define the 4 locations to be iterated over
+loc1, loc2, loc3, loc4 = 0, 0, 0, 0
+
+# Create all of the propositions by iterating over the 4 locations with each colour
+for i in range(COLOURS_LENGTH):
+    for j in range(COLOURS_LENGTH):
+        for k in range(COLOURS_LENGTH):
+            for l in range(COLOURS_LENGTH):
+                PROPOSITIONS.append(BasicBoardPropositions(loc1, loc2, loc3, loc4))
+                loc4 += 1
+            loc3 += 1
+            loc4 = 0
+        loc2 += 1
+        loc3 = 0
+    loc1 += 1
+    loc2 = 0
+
+print(PROPOSITIONS)
+
+
 # To create propositions, create classes for them first, annotated with "@proposition" and the Encoding
 @proposition(E)
 class BasicPropositions:
-
     def __init__(self, data):
         self.data = data
 
@@ -24,16 +63,16 @@ class BasicPropositions:
 @constraint.at_least_one(E)
 @proposition(E)
 class FancyPropositions:
-
     def __init__(self, data):
         self.data = data
 
     def __repr__(self):
         return f"A.{self.data}"
 
+
 # Call your variables whatever you want
 a = BasicPropositions("a")
-b = BasicPropositions("b")   
+b = BasicPropositions("b")
 c = BasicPropositions("c")
 d = BasicPropositions("d")
 e = BasicPropositions("e")
@@ -49,7 +88,7 @@ z = FancyPropositions("z")
 #  This restriction is fairly minimal, and if there is any concern, reach out to the teaching staff to clarify
 #  what the expectations are.
 def example_theory():
-    # Add custom constraints by creating formulas with the variables you created. 
+    # Add custom constraints by creating formulas with the variables you created.
     E.add_constraint((a | b) & ~x)
     # Implication
     E.add_constraint(y >> z)
@@ -74,7 +113,7 @@ if __name__ == "__main__":
     print("   Solution: %s" % T.solve())
 
     print("\nVariable likelihoods:")
-    for v,vn in zip([a,b,c,x,y,z], 'abcxyz'):
+    for v, vn in zip([a, b, c, x, y, z], "abcxyz"):
         # Ensure that you only send these functions NNF formulas
         # Literals are compiled to NNF here
         print(" %s: %.2f" % (vn, likelihood(T, v)))
