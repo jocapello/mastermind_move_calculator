@@ -8,6 +8,10 @@ COLOURS = ["red", "green", "blue", "purple", "yellow", "white"]
 COLOURS_LENGTH = len(COLOURS)
 GUESS_LOCATIONS = 4
 
+PEGS = ["red", "white", "blank"]
+PEGS_LENGTH = len(PEGS)
+PEG_LOCATIONS = 4
+
 PROPOSITIONS = []
 
 
@@ -15,25 +19,71 @@ class Unique(object):
     def __hash__(self):
         return hash(str(self))
 
-
-@proposition(E)
-class BasicBoardPropositions(Unique):
-    def __init__(self, loc1, loc2, loc3, loc4):
-        self.colours = [COLOURS[loc1], COLOURS[loc2], COLOURS[loc3], COLOURS[loc4]]
+    def __eq__(self, other):
+        return hash(self) == hash(other)
 
     def __repr__(self):
-        return f"0: {self.colours[0]} 1: {self.colours[1]} 2: {self.colours[2]} 3: {self.colours[3]}\n"
+        return str(self)
+
+    def __str__(self):
+        assert False, "You need to define the __str__ function on a proposition class"
+
+
+# An item must have a location and a colour => it will also be a part of a row
+@proposition(E)
+class Item(Unique):
+    def __init__(self, colour, location):
+        self.colour = colour
+        self.location = location
+
+    def __str__(self):
+        return f"I-{self.location}.{self.colour}"
+
+
+# A peg must have a location, a colour (could be blank) and be a part of a row
+@proposition(E)
+class Peg(Unique):
+    def __init__(self, colour, location):
+        self.colour = colour
+        self.location = location
+
+    def __str__(self):
+        return f"P-{self.location}.{self.colour}"
+
+
+# A row must have 4 items in it, and 0-4 pegs
+@proposition(E)
+class Row(Unique):
+    def __init__(self, items: list, pegs: list):
+        self.items = [Item(items[0], i) for i in range(len(items))]
+        self.pegs = [Peg(items[0], i) for i in range(len(items))]
+
+    def __str__(self):
+        return f"ROWS-{[it for it in self.items]}"
+
+
+# A board is defined as having at least 1 row
+@proposition(E)
+class Board(Unique):
+    def __init__(self, rows: list):
+        self.rows = rows
+
+    def __str__(self):
+        return f"**Board**:\n{[row for row in self.rows]}"
 
 
 # Define the 4 locations to be iterated over
 loc1, loc2, loc3, loc4 = 0, 0, 0, 0
 
-# Create all of the propositions by iterating over the 4 locations with each colour
+# Create all of the possible row colour combinations
+item_colours = []
 for i in range(COLOURS_LENGTH):
     for j in range(COLOURS_LENGTH):
         for k in range(COLOURS_LENGTH):
             for l in range(COLOURS_LENGTH):
-                PROPOSITIONS.append(BasicBoardPropositions(loc1, loc2, loc3, loc4))
+                item_colours.append(
+                    [COLOURS[loc1], COLOURS[loc2], COLOURS[loc3], COLOURS[loc4]]
+                )
                 loc4 += 1
             loc3 += 1
             loc4 = 0
@@ -42,17 +92,44 @@ for i in range(COLOURS_LENGTH):
     loc1 += 1
     loc2 = 0
 
-print(PROPOSITIONS)
 
+# Define the 4 locations to be iterated over
+loc1, loc2, loc3, loc4 = 0, 0, 0, 0
+
+# Create all of the possible peg combinations
+pegs_colours = []
+for i in range(PEGS_LENGTH):
+    for j in range(PEGS_LENGTH):
+        for k in range(PEGS_LENGTH):
+            for l in range(PEGS_LENGTH):
+                pegs_colours.append([PEGS[loc1], PEGS[loc2], PEGS[loc3], PEGS[loc4]])
+                loc4 += 1
+            loc3 += 1
+            loc4 = 0
+        loc2 += 1
+        loc3 = 0
+    loc1 += 1
+    loc2 = 0
+
+print(pegs_colours)
+
+# Create all of the possible row states by combining the boards and the pegs
+all_rows = []
+for item_row in item_colours:
+    for peg_row in pegs_colours:
+        all_rows.append(Row(item_row, peg_row))
+
+
+print(all_rows)
 
 # To create propositions, create classes for them first, annotated with "@proposition" and the Encoding
-@proposition(E)
-class BasicPropositions:
-    def __init__(self, data):
-        self.data = data
+# @proposition(E)
+# class BasicPropositions:
+#     def __init__(self, data):
+#         self.data = data
 
-    def __repr__(self):
-        return f"A.{self.data}"
+#     def __repr__(self):
+#         return f"A.{self.data}"
 
 
 # Different classes for propositions are useful because this allows for more dynamic constraint creation
@@ -60,26 +137,23 @@ class BasicPropositions:
 # that are instances of this class must be true by using a @constraint decorator.
 # other options include: at most one, exactly one, at most k, and implies all.
 # For a complete module reference, see https://bauhaus.readthedocs.io/en/latest/bauhaus.html
-@constraint.at_least_one(E)
-@proposition(E)
-class FancyPropositions:
-    def __init__(self, data):
-        self.data = data
+# @constraint.at_least_one(E)
+# @proposition(E)
+# class FancyPropositions:
+#     def __init__(self, data):
+#         self.data = data
 
-    def __repr__(self):
-        return f"A.{self.data}"
+#     def __repr__(self):
+#         return f"A.{self.data}"
 
 
 # Call your variables whatever you want
-a = BasicPropositions("a")
-b = BasicPropositions("b")
-c = BasicPropositions("c")
-d = BasicPropositions("d")
-e = BasicPropositions("e")
+g1 = BasicBoardPropositions("red", "red", "red", "red")
+ans1 = BasicBoardPropositions("red", "red", "red", "red")
 # At least one of these will be true
-x = FancyPropositions("x")
-y = FancyPropositions("y")
-z = FancyPropositions("z")
+# x = FancyPropositions("x")
+# y = FancyPropositions("y")
+# z = FancyPropositions("z")
 
 
 # Build an example full theory for your setting and return it.
@@ -88,15 +162,17 @@ z = FancyPropositions("z")
 #  This restriction is fairly minimal, and if there is any concern, reach out to the teaching staff to clarify
 #  what the expectations are.
 def example_theory():
-    # Add custom constraints by creating formulas with the variables you created.
-    E.add_constraint((a | b) & ~x)
-    # Implication
-    E.add_constraint(y >> z)
-    # Negate a formula
-    E.add_constraint(~(x & y))
-    # You can also add more customized "fancy" constraints. Use case: you don't want to enforce "exactly one"
-    # for every instance of BasicPropositions, but you want to enforce it for a, b, and c.:
-    constraint.add_exactly_one(E, a, b, c)
+    E.add_constraint(g1 & ans1)
+
+    # # Add custom constraints by creating formulas with the variables you created.
+    # E.add_constraint((a | b) & ~x)
+    # # Implication
+    # E.add_constraint(y >> z)
+    # # Negate a formula
+    # E.add_constraint(~(x & y))
+    # # You can also add more customized "fancy" constraints. Use case: you don't want to enforce "exactly one"
+    # # for every instance of BasicPropositions, but you want to enforce it for a, b, and c.:
+    # constraint.add_exactly_one(E, a, b, c)
 
     return E
 
