@@ -5,6 +5,7 @@ from bauhaus.utils import count_solutions, likelihood
 E = Encoding()
 
 COLOURS = ["red", "green", "blue", "purple", "yellow", "white"]
+COLOURS_LENGTH = len(COLOURS)
 GUESS_LOCATIONS = 4
 
 PROPOSITIONS = []
@@ -15,54 +16,33 @@ class Unique(object):
         return hash(str(self))
 
 
-# @proposition(E)
-# class BasicBoardPropositions(Unique):
-#     def __init__(self, colour, location, type):
-#         self.colour = colour
-#         self.location = location
-#         self.type = type
+@proposition(E)
+class BasicBoardPropositions(Unique):
+    def __init__(self, loc1, loc2, loc3, loc4):
+        self.colours = [COLOURS[loc1], COLOURS[loc2], COLOURS[loc3], COLOURS[loc4]]
 
-#     def __repr__(self):
-#         return f"{self.type} - location: {self.location} | {self.colour}"
+    def __repr__(self):
+        return f"0: {self.colours[0]} 1: {self.colours[1]} 2: {self.colours[2]} 3: {self.colours[3]}\n"
 
 
-# Create all of the propositions
-def create_guess(a, b, c, d):
-    return [COLOURS[a], COLOURS[b], COLOURS[c], COLOURS[d]]
+# Define the 4 locations to be iterated over
+loc1, loc2, loc3, loc4 = 0, 0, 0, 0
 
+# Create all of the propositions by iterating over the 4 locations with each colour
+for i in range(COLOURS_LENGTH):
+    for j in range(COLOURS_LENGTH):
+        for k in range(COLOURS_LENGTH):
+            for l in range(COLOURS_LENGTH):
+                PROPOSITIONS.append(BasicBoardPropositions(loc1, loc2, loc3, loc4))
+                loc4 += 1
+            loc3 += 1
+            loc4 = 0
+        loc2 += 1
+        loc3 = 0
+    loc1 += 1
+    loc2 = 0
 
-a = 0
-b = 0
-c = 0
-d = 0
-ans = []
-for i in range(len(COLOURS)):
-    for j in range(len(COLOURS)):
-        for k in range(len(COLOURS)):
-            for l in range(len(COLOURS)):
-                ans.append(create_guess(a, b, c, d))
-                d += 1
-            c += 1
-            d = 0
-        b += 1
-        c = 0
-    a += 1
-    b = 0
-
-# for i in range(GUESS_LOCATIONS):
-#     for colour in COLOURS:
-#         for location in GUESS_LOCATIONS:
-#             PROPOSITIONS.append(BasicBoardPropositions(colour, location, "board"))
-#             PROPOSITIONS.append(BasicBoardPropositions(colour, location, "answer"))
-
-# for colour in PEG_COLOURS:
-#     for location in PEG_LOCATIONS:
-#         PROPOSITIONS.append(BasicBoardPropositions(colour, location, "peg"))
-# print(PROPOSITIONS)
-# Peg, Guess, and Answer has exactly one colour
-
-
-# ----
+print(PROPOSITIONS)
 
 
 # To create propositions, create classes for them first, annotated with "@proposition" and the Encoding
