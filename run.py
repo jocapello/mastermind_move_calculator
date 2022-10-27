@@ -54,7 +54,7 @@ def example_theory():
     # Implication
     E.add_constraint(y >> z)
     # Negate a formula
-    E.add_constraint((x & y).negate())
+    E.add_constraint(~(x & y))
     # You can also add more customized "fancy" constraints. Use case: you don't want to enforce "exactly one"
     # for every instance of BasicPropositions, but you want to enforce it for a, b, and c.:
     constraint.add_exactly_one(E, a, b, c)
