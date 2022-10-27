@@ -1,14 +1,73 @@
-
 from bauhaus import Encoding, proposition, constraint
 from bauhaus.utils import count_solutions, likelihood
 
 # Encoding that will store all of your constraints
 E = Encoding()
 
+COLOURS = ["red", "green", "blue", "purple", "yellow", "white"]
+GUESS_LOCATIONS = 4
+
+PROPOSITIONS = []
+
+
+class Unique(object):
+    def __hash__(self):
+        return hash(str(self))
+
+
+# @proposition(E)
+# class BasicBoardPropositions(Unique):
+#     def __init__(self, colour, location, type):
+#         self.colour = colour
+#         self.location = location
+#         self.type = type
+
+#     def __repr__(self):
+#         return f"{self.type} - location: {self.location} | {self.colour}"
+
+
+# Create all of the propositions
+def create_guess(a, b, c, d):
+    return [COLOURS[a], COLOURS[b], COLOURS[c], COLOURS[d]]
+
+
+a = 0
+b = 0
+c = 0
+d = 0
+ans = []
+for i in range(len(COLOURS)):
+    for j in range(len(COLOURS)):
+        for k in range(len(COLOURS)):
+            for l in range(len(COLOURS)):
+                ans.append(create_guess(a, b, c, d))
+                d += 1
+            c += 1
+            d = 0
+        b += 1
+        c = 0
+    a += 1
+    b = 0
+
+# for i in range(GUESS_LOCATIONS):
+#     for colour in COLOURS:
+#         for location in GUESS_LOCATIONS:
+#             PROPOSITIONS.append(BasicBoardPropositions(colour, location, "board"))
+#             PROPOSITIONS.append(BasicBoardPropositions(colour, location, "answer"))
+
+# for colour in PEG_COLOURS:
+#     for location in PEG_LOCATIONS:
+#         PROPOSITIONS.append(BasicBoardPropositions(colour, location, "peg"))
+# print(PROPOSITIONS)
+# Peg, Guess, and Answer has exactly one colour
+
+
+# ----
+
+
 # To create propositions, create classes for them first, annotated with "@proposition" and the Encoding
 @proposition(E)
 class BasicPropositions:
-
     def __init__(self, data):
         self.data = data
 
@@ -24,16 +83,16 @@ class BasicPropositions:
 @constraint.at_least_one(E)
 @proposition(E)
 class FancyPropositions:
-
     def __init__(self, data):
         self.data = data
 
     def __repr__(self):
         return f"A.{self.data}"
 
+
 # Call your variables whatever you want
 a = BasicPropositions("a")
-b = BasicPropositions("b")   
+b = BasicPropositions("b")
 c = BasicPropositions("c")
 d = BasicPropositions("d")
 e = BasicPropositions("e")
@@ -49,12 +108,12 @@ z = FancyPropositions("z")
 #  This restriction is fairly minimal, and if there is any concern, reach out to the teaching staff to clarify
 #  what the expectations are.
 def example_theory():
-    # Add custom constraints by creating formulas with the variables you created. 
+    # Add custom constraints by creating formulas with the variables you created.
     E.add_constraint((a | b) & ~x)
     # Implication
     E.add_constraint(y >> z)
     # Negate a formula
-    E.add_constraint((x & y).negate())
+    E.add_constraint(~(x & y))
     # You can also add more customized "fancy" constraints. Use case: you don't want to enforce "exactly one"
     # for every instance of BasicPropositions, but you want to enforce it for a, b, and c.:
     constraint.add_exactly_one(E, a, b, c)
@@ -74,7 +133,7 @@ if __name__ == "__main__":
     print("   Solution: %s" % T.solve())
 
     print("\nVariable likelihoods:")
-    for v,vn in zip([a,b,c,x,y,z], 'abcxyz'):
+    for v, vn in zip([a, b, c, x, y, z], "abcxyz"):
         # Ensure that you only send these functions NNF formulas
         # Literals are compiled to NNF here
         print(" %s: %.2f" % (vn, likelihood(T, v)))
