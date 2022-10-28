@@ -119,10 +119,14 @@ class Peg(Unique):
 #     for peg_row in pegs_colours:
 #         all_rows.append(Row(item_row, peg_row))
 
+A = [Item("red", 0), Item("red", 1), Item("red", 2), Item("red", 3)]
 
 # Constraint to ensure there is 1 location per colour
 for location in range(GUESS_LOCATIONS):
     constraint.add_exactly_one(E, [Item(colour, location) for colour in COLOURS])
+
+# Remove the specific guess that we've provided
+E.add_constraint(~(A[0] & A[1] & A[2] & A[3]))
 
 
 # g1 = Row(["red", "red", "red", "red"], ["blank", "blank", "blank", "blank"])
