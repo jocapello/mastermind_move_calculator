@@ -119,14 +119,20 @@ class Peg(Unique):
 #     for peg_row in pegs_colours:
 #         all_rows.append(Row(item_row, peg_row))
 
-A = [Item("red", 0), Item("red", 1), Item("red", 2), Item("red", 3)]
+# We define our items, and then a dictionary containing our pegs
+A = [
+    Item("red", 0),
+    Item("red", 1),
+    Item("red", 2),
+    Item("red", 3),
+    {"blank": 2, "white": 2, "red": 0},
+]
 
 # Constraint to ensure there is 1 location per colour
 for location in range(GUESS_LOCATIONS):
     constraint.add_exactly_one(E, [Item(colour, location) for colour in COLOURS])
 
 # Remove the specific guess that we've provided
-E.add_constraint(~(A[0] & A[1] & A[2] & A[3]))
 
 
 # g1 = Row(["red", "red", "red", "red"], ["blank", "blank", "blank", "blank"])
@@ -145,20 +151,22 @@ E.add_constraint(~(A[0] & A[1] & A[2] & A[3]))
 #  what the expectations are.
 def example_theory():
     # our answer can't be the original guess
-    # for prop in PROPOSITIONS:
-    #     E.add_constraint(prop)
-    # E.add_constraint(~(g1))
-    # E.add_constraint(~(g1))
+    E.add_constraint(~(A[0] & A[1] & A[2] & A[3]))
+    pegs = A[4]
 
-    # # Add custom constraints by creating formulas with the variables you created.
-    # E.add_constraint((a | b) & ~x)
-    # # Implication
-    # E.add_constraint(y >> z)
-    # # Negate a formula
-    # E.add_constraint(~(x & y))
-    # # You can also add more customized "fancy" constraints. Use case: you don't want to enforce "exactly one"
-    # # for every instance of BasicPropositions, but you want to enforce it for a, b, and c.:
-    # constraint.add_exactly_one(E, a, b, c)
+    if pegs["white"] == 1:
+        # we need to ensure there is at least 1 of the colours in the final solution
+        colours = [A[item].colour for item in range(len(A) - 1)]
+        con = []
+        for colour in colours:
+            con.append(
+                Item(colour, 0) | Item(colour, 1) | Item(colour, 2) | Item(colour, 3)
+            )
+        E.add_constraint(con[0] | con[1] | con[2] | con[3])
+    # elif pegs['white'] == 2:
+    #     # we need to ensure at least 2 of the colours are in the final solution
+    #     colours = [A[item].colour for item in range(len(A) - 1)]
+    #     con = []
 
     return E
 
