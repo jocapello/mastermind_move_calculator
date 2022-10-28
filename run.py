@@ -52,80 +52,81 @@ class Peg(Unique):
 
 
 # A row must have 4 items in it, and 0-4 pegs
-@proposition(E)
-class Row(Unique):
-    def __init__(self, items: list, pegs: list):
-        self.items = [Item(items[i], i) for i in range(len(items))]
-        self.pegs = [Peg(pegs[i], i) for i in range(len(pegs))]
+# @proposition(E)
+# class Row(Unique):
+#     def __init__(self, items: list, pegs: list):
+#         self.items = [Item(items[i], i) for i in range(len(items))]
+#         self.pegs = [Peg(pegs[i], i) for i in range(len(pegs))]
 
-    def __str__(self):
-        return f"ROWS-{[it for it in self.items]}"
+#     def __str__(self):
+#         return f"ROWS-{[it for it in self.items]}"
 
 
 # A board is defined as having at least 1 row
-@proposition(E)
-class Board(Unique):
-    def __init__(self, rows: list):
-        self.rows = rows
+# @proposition(E)
+# class Board(Unique):
+#     def __init__(self, rows: list):
+#         self.rows = rows
 
-    def __str__(self):
-        return f"B:{[row for row in self.rows]}"
+#     def __str__(self):
+#         return f"B:{[row for row in self.rows]}"
 
 
 # Define the 4 locations to be iterated over
-loc1, loc2, loc3, loc4 = 0, 0, 0, 0
+# loc1, loc2, loc3, loc4 = 0, 0, 0, 0
 
 # Create all of the possible row colour combinations
-item_colours = []
-for i in range(COLOURS_LENGTH):
-    for j in range(COLOURS_LENGTH):
-        for k in range(COLOURS_LENGTH):
-            for l in range(COLOURS_LENGTH):
-                item_colours.append(
-                    [COLOURS[loc1], COLOURS[loc2], COLOURS[loc3], COLOURS[loc4]]
-                )
-                loc4 += 1
-            loc3 += 1
-            loc4 = 0
-        loc2 += 1
-        loc3 = 0
-    loc1 += 1
-    loc2 = 0
+# item_colours = []
+# for i in range(COLOURS_LENGTH):
+#     for j in range(COLOURS_LENGTH):
+#         for k in range(COLOURS_LENGTH):
+#             for l in range(COLOURS_LENGTH):
+#                 item_colours.append(
+#                     [COLOURS[loc1], COLOURS[loc2], COLOURS[loc3], COLOURS[loc4]]
+#                 )
+#                 loc4 += 1
+#             loc3 += 1
+#             loc4 = 0
+#         loc2 += 1
+#         loc3 = 0
+#     loc1 += 1
+#     loc2 = 0
 
 
 # Define the 4 locations to be iterated over
-loc1, loc2, loc3, loc4 = 0, 0, 0, 0
+# loc1, loc2, loc3, loc4 = 0, 0, 0, 0
 
 # Create all of the possible peg combinations
-pegs_colours = []
-for i in range(PEGS_LENGTH):
-    for j in range(PEGS_LENGTH):
-        for k in range(PEGS_LENGTH):
-            for l in range(PEGS_LENGTH):
-                pegs_colours.append([PEGS[loc1], PEGS[loc2], PEGS[loc3], PEGS[loc4]])
-                loc4 += 1
-            loc3 += 1
-            loc4 = 0
-        loc2 += 1
-        loc3 = 0
-    loc1 += 1
-    loc2 = 0
+# pegs_colours = []
+# for i in range(PEGS_LENGTH):
+#     for j in range(PEGS_LENGTH):
+#         for k in range(PEGS_LENGTH):
+#             for l in range(PEGS_LENGTH):
+#                 pegs_colours.append([PEGS[loc1], PEGS[loc2], PEGS[loc3], PEGS[loc4]])
+#                 loc4 += 1
+#             loc3 += 1
+#             loc4 = 0
+#         loc2 += 1
+#         loc3 = 0
+#     loc1 += 1
+#     loc2 = 0
 
 # print(pegs_colours)
 
 # Create all of the possible row states by combining the boards and the pegs
-all_rows = []
-for item_row in item_colours:
-    for peg_row in pegs_colours:
-        all_rows.append(Row(item_row, peg_row))
-
-# print(all_rows)
+# all_rows = []
+# for item_row in item_colours:
+#     for peg_row in pegs_colours:
+#         all_rows.append(Row(item_row, peg_row))
 
 
-g1 = Board([Row(["red", "red", "red", "red"], ["blank", "blank", "blank", "blank"])])
-ans1 = Board(
-    [Row(["green", "red", "red", "red"], ["blank", "blank", "blank", "blank"])]
-)
+# Constraint to ensure there is 1 location per colour
+for location in range(GUESS_LOCATIONS):
+    constraint.add_exactly_one(E, [Item(colour, location) for colour in COLOURS])
+
+
+# g1 = Row(["red", "red", "red", "red"], ["blank", "blank", "blank", "blank"])
+# ans1 = Row(["red", "red", "red", "red"], ["blank", "blank", "blank", "blank"])
 
 # At least one of these will be true
 # x = FancyPropositions("x")
@@ -136,10 +137,14 @@ ans1 = Board(
 # Build an example full theory for your setting and return it.
 #
 #  There should be at least 10 variables, and a sufficiently large formula to describe it (>50 operators).
-#  This restriction is fairly minimal, and if there is any concern, reach out to the teaching staff to clarify
+#  This restriction is fairly minimal, and if there is any concern, reach out to the teaching staff to clarifyw
 #  what the expectations are.
 def example_theory():
-    E.add_constraint(g1 & ans1)
+    # our answer can't be the original guess
+    # for prop in PROPOSITIONS:
+    #     E.add_constraint(prop)
+    # E.add_constraint(~(g1))
+    # E.add_constraint(~(g1))
 
     # # Add custom constraints by creating formulas with the variables you created.
     # E.add_constraint((a | b) & ~x)
@@ -166,7 +171,7 @@ if __name__ == "__main__":
     print("   Solution: %s" % T.solve())
 
     print("\nVariable likelihoods:")
-    for v, vn in zip([a, b, c, x, y, z], "abcxyz"):
+    for v, vn in zip([], "abcxyz"):
         # Ensure that you only send these functions NNF formulas
         # Literals are compiled to NNF here
         print(" %s: %.2f" % (vn, likelihood(T, v)))
