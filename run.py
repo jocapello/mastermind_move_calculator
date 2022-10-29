@@ -122,10 +122,10 @@ class Peg(Unique):
 # We define our items, and then a dictionary containing our pegs
 A = [
     Item("red", 0),
-    Item("red", 1),
-    Item("red", 2),
-    Item("red", 3),
-    {"blank": 2, "white": 2, "red": 0},
+    Item("green", 1),
+    Item("blue", 2),
+    Item("orange", 3),
+    {"blank": 1, "white": 1, "red": 2},
 ]
 
 # Constraint to ensure there is 1 location per colour
@@ -133,15 +133,6 @@ for location in range(GUESS_LOCATIONS):
     constraint.add_exactly_one(E, [Item(colour, location) for colour in COLOURS])
 
 # Remove the specific guess that we've provided
-
-
-# g1 = Row(["red", "red", "red", "red"], ["blank", "blank", "blank", "blank"])
-# ans1 = Row(["red", "red", "red", "red"], ["blank", "blank", "blank", "blank"])
-
-# At least one of these will be true
-# x = FancyPropositions("x")
-# y = FancyPropositions("y")
-# z = FancyPropositions("z")
 
 
 # Build an example full theory for your setting and return it.
@@ -163,10 +154,17 @@ def example_theory():
                 Item(colour, 0) | Item(colour, 1) | Item(colour, 2) | Item(colour, 3)
             )
         E.add_constraint(con[0] | con[1] | con[2] | con[3])
-    # elif pegs['white'] == 2:
-    #     # we need to ensure at least 2 of the colours are in the final solution
-    #     colours = [A[item].colour for item in range(len(A) - 1)]
-    #     con = []
+
+    if pegs["red"] == 1:
+        E.add_constraint(A[0] | A[1] | A[2] | A[3])
+    elif pegs["red"] == 2:
+        x = ""
+        for i in range(len(A) - 1):
+            for j in range(len(A) - 1):
+                x = (A[i] & A[j]) if x == "" else x | (A[i] & A[j])
+        # possible = [[x = x | A[i] & A[j] for j in range(len(A) - 1)] for i in range(len(A) - 1)]
+        print("possible", x)
+        E.add_constraint(x)
 
     return E
 
