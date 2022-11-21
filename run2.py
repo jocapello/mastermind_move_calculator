@@ -36,8 +36,7 @@ Rg = init_peg("R")
 #number of white pegs
 Wg = init_peg("W")
 
-code = input("enter colors here: ").split(",")
-guess = input("enter guess here: ").split(",")
+
 
 
 def set_code_state(code, grid):
@@ -56,8 +55,8 @@ def set_peg_state(pegs, grid):
         grid[x] == truth
     return f
 
-print(set_code_state(code, C).__repr__())
-print(set_code_state(guess, G).__repr__())
+# print(set_code_state(code, C).__repr__())
+# print(set_code_state(guess, G).__repr__())
 
 def get_red(C, G):
     grid = []
@@ -69,7 +68,7 @@ def get_red(C, G):
     return grid
 
 R = get_red(C, G)
-print(R.__repr__())
+# print(R.__repr__())
 def get_white(C, G):
     grid = []
     for loc in range(CODE_LENGTH):
@@ -81,8 +80,12 @@ def get_white(C, G):
     return grid
 
 W = get_white(C, G)
+<<<<<<< HEAD
 for i, w in enumerate(W):
     print(i, w.__repr__())
+=======
+# print(W.__repr__())
+>>>>>>> e5c16dc606f74258c1fde3227b683c0a26672d63
 
 def count_list(lst, isnum):
     if isnum == 0:
@@ -95,19 +98,81 @@ def count_list(lst, isnum):
         for i, l in enumerate(lst):
             f |= l & count_list(lst[:i]+lst[i+1:], isnum-1)
         return f
-            
-def count_red(R):
+def min_count(lst1, lst2):
     grid = []
     for num in range(CODE_LENGTH+1):
-        grid.append(count_list(R, num))
+        f1 = lst1[num]
+        f2 = lst2[num]
+        
+        for lower_num in range(num):
+            f1 &= lst2[lower_num].negate()
+            f2 &= lst1[lower_num].negate()
+        grid.append(f1 | f2)
     return grid
 
+<<<<<<< HEAD
 for i, count in enumerate(count_red(R)):
     print(i, count.__repr__())
+=======
+def max_count(lst1, lst2):
+    grid = []
+    for num in range(CODE_LENGTH+1):
+        f1 = lst1[num]
+        f2 = lst2[num]
+        
+        for higher_num in range(num, CODE_LENGTH+1):
+            f1 &= lst2[higher_num].negate()
+            f2 &= lst1[higher_num].negate()
+        grid.append(f1 | f2)
+    return grid
+def equiv_lists(lst1, lst2):
+    f = true
+    for num in range(CODE_LENGTH+1):
+        f &= lst1[num] & lst2[num]
+            
+def count_list(lst):
+    grid = []
+    for num in range(CODE_LENGTH+1):
+        grid.append(count_list(lst, num))
+    return grid
+>>>>>>> e5c16dc606f74258c1fde3227b683c0a26672d63
 
-def list_total(R, C, G):
-    R_count = count_red(R)
-    W_true = []
+for count in count_list(R):
+    # print(count.__repr__())
+
+def list_total(R, W, C, G):
+    R_count = count_list(R)
+    W_true = [false for i in range(CODE_LENGTH)]
     for col in range(COLORS_LENGTH):
-        code_is_col = [loc[col] for loc in C]
-        loc_col_is_red = [R[loc] & G[loc][col] for loc in range(CODE_LENGTH)]
+        code_can_be_white = [C[loc][col] | (R[loc] & G[loc][col]).negate() for loc in range(CODE_LENGTH)]
+        W_this_col = [G[loc][col] | W[loc] for loc in range(CODE_LENGTH)]
+        for loc in range(CODE_LENGTH):
+            count_can_be_white = count_list(code_can_be_white)
+            count_prev_W = count_list(W_this_col[:loc])
+            W_true[loc] |= equiv_lists(count_prev_W, max_count(count_can_be_white, count_prev_W)).negate() & W_this_col[loc]
+    W_count = count_list(W_true)
+    return R_count, W_count
+
+R_count, W_count = list_total(R, W, C, G)
+
+def equiv_label(labels, lst):
+    grid = []
+    for i in range(len(labels)):
+        grid.append((labels[i].negate() & lst[i].negate()) | (labels[i] & lst[i]))
+R_e = equiv_label(Rg, R_count)
+W_e = equiv_label(Wg, W_count)
+
+E.add_constraint(R_e)
+E.add_constraint(W_e)
+
+if __name__ == "__main__":
+    code = input("enter colors here: ").split(",")
+    guess = input("enter guess here: ").split(",")
+
+    E.add_constraint(set_code_state(code, C))
+
+    E.add_constraint(set_code_state(guess, G))
+
+    E = E.compile()
+
+    print(E.solve())
