@@ -47,7 +47,7 @@ def set_code_state(code, grid):
             if color == col:
                 f &= grid[x][y]
             else:
-                f &= ~grid[x][y]
+                f &= grid[x][y].negate()
     return f
 
 def set_peg_state(pegs, grid):
@@ -56,8 +56,8 @@ def set_peg_state(pegs, grid):
         grid[x] == truth
     return f
 
-print(set_code_state(code, C)._repr_pretty_())
-print(set_code_state(guess, G)._repr_pretty_())
+print(set_code_state(code, C).__repr__())
+print(set_code_state(guess, G).__repr__())
 
 def get_red(C, G):
     grid = []
@@ -69,24 +69,24 @@ def get_red(C, G):
     return grid
 
 R = get_red(C, G)
-print(R._repr_pretty_())
+print(R.__repr__())
 def get_white(C, G):
     grid = []
     for loc in range(CODE_LENGTH):
         f = false
         for col in range(COLORS_LENGTH):
             for loc2 in range(CODE_LENGTH):
-                f |= ~R[loc] & ~R[loc2] & G[loc][col] & C[loc2][col]
+                f |= R[loc].negate() & R[loc2].negate() & G[loc][col] & C[loc2][col]
         grid.append(f)
 
 W = get_white(C, G)
-print(W._repr_pretty_())
+print(W.__repr__())
 
 def count_list(lst, isnum):
     if isnum == 0:
         f = true
         for l in lst:
-            f &= ~l
+            f &= l.negate()
         return f
     else:
         f = false
@@ -101,7 +101,7 @@ def count_red(R):
     return grid
 
 for count in count_red(R):
-    print(count._repr_pretty_())
+    print(count.__repr__())
 
 def list_total(R, C, G):
     R_count = count_red(R)
