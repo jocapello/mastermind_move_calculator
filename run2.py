@@ -78,9 +78,11 @@ def get_white(C, G):
             for loc2 in range(CODE_LENGTH):
                 f |= R[loc].negate() & R[loc2].negate() & G[loc][col] & C[loc2][col]
         grid.append(f)
+    return grid
 
 W = get_white(C, G)
-print(W.__repr__())
+for i, w in enumerate(W):
+    print(i, w.__repr__())
 
 def count_list(lst, isnum):
     if isnum == 0:
@@ -100,8 +102,8 @@ def count_red(R):
         grid.append(count_list(R, num))
     return grid
 
-for count in count_red(R):
-    print(count.__repr__())
+for i, count in enumerate(count_red(R)):
+    print(i, count.__repr__())
 
 def list_total(R, C, G):
     R_count = count_red(R)
