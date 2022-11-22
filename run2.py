@@ -154,8 +154,12 @@ def equiv_label(labels, lst):
 R_e = equiv_label(Rg, R_count)
 W_e = equiv_label(Wg, W_count)
 
-E.add_constraint(R_e)
-E.add_constraint(W_e)
+for r in R_e:
+
+    E.add_constraint(r)
+for w in W_e:
+
+    E.add_constraint(w)
 
 if __name__ == "__main__":
     code = input("enter colors here: ").split(",")
