@@ -121,7 +121,7 @@ def max_count(lst1, lst2):
 def equiv_lists(lst1, lst2):
     f = true
     for num in range(CODE_LENGTH+1):
-        f &= lst1[num] & lst2[num]
+        f &= ((lst1[num].negate() | lst2[num]) & (lst1[num] | lst2[num].negate()))
     return f
             
 def count_list(lst):
