@@ -1,6 +1,6 @@
 from bauhaus import Encoding, proposition, constraint
 from bauhaus.utils import count_solutions, likelihood
-from nnf import Var
+from nnf import Var, And
 from nnf import true, false
 # Encoding that will store all of your constraints
 E = Encoding()
@@ -8,6 +8,8 @@ E = Encoding()
 COLORS = ["red", "green", "blue", "purple", "yellow", "white"]
 COLORS_LENGTH = len(COLORS)
 CODE_LENGTH = 4
+
+T = []
 
 
 
@@ -156,19 +158,19 @@ W_e = equiv_label(Wg, W_count)
 
 for r in R_e:
 
-    E.add_constraint(r)
+    T.append(r)
 for w in W_e:
 
-    E.add_constraint(w)
+    T.append(w)
 
 if __name__ == "__main__":
     code = input("enter colors here: ").split(",")
     guess = input("enter guess here: ").split(",")
 
-    E.add_constraint(set_code_state(code, C))
+    T.append(set_code_state(code, C))
 
-    E.add_constraint(set_code_state(guess, G))
+    T.append(set_code_state(guess, G))
 
     
-
-    print(E.solve())
+    T_com = And(T)
+    print(T_com.solve())
