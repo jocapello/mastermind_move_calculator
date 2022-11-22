@@ -23,6 +23,12 @@ def init_code(type_of):
         pos_grid.append(col_grid)
     return pos_grid
 
+def init_loc_peg(type_of):
+    grid = []
+    for loc in range(CODE_LENGTH):
+        grid.append(Var(f'{type_of}_{loc}'))
+    return grid
+
 def init_peg(type_of):
     grid = []
     for num in range(CODE_LENGTH+1):
@@ -33,11 +39,22 @@ def init_peg(type_of):
 C = init_code("C")
 #this is the guess proposition
 G = init_code("G")
-#number of red pegs
-Rg = init_peg("R")
-#number of white pegs
-Wg = init_peg("W")
 
+Rl = init_loc_peg("Rl")
+
+Wl = init_loc_peg("Wl")
+
+#number of red pegs
+Rn = init_peg("Rn")
+#number of white pegs
+Wn = init_peg("Wn")
+
+
+def equiv_label(labels, lst):
+    grid = []
+    for i in range(len(labels)):
+        grid.append((labels[i] | lst[i].negate()) & (labels[i].negate() | lst[i]))
+    return grid
 
 
 
@@ -69,7 +86,7 @@ def get_red(C, G):
         grid.append(f)
     return grid
 
-R = get_red(C, G)
+Rc = get_red(C, G)
 # print(R.__repr__())
 def get_white(C, G):
     grid = []
@@ -81,8 +98,15 @@ def get_white(C, G):
         grid.append(f)
     return grid
 
-W = get_white(C, G)
+Wc = get_white(C, G)
 # print(W.__repr__())
+
+
+T = T + equiv_label(Rl, Rc)
+T = T + equiv_label(Wl, Wc)
+
+
+
 
 def count_num(lst, isnum):
     if isnum == 0:
@@ -113,7 +137,7 @@ def max_count(lst1, lst2):
         f1 = lst1[num]
         f2 = lst2[num]
         
-        for higher_num in range(num, CODE_LENGTH+1):
+        for higher_num in range(num+1, CODE_LENGTH+1):
             f1 &= lst2[higher_num].negate()
             f2 &= lst1[higher_num].negate()
         grid.append(f1 | f2)
@@ -122,6 +146,12 @@ def equiv_lists(lst1, lst2):
     f = true
     for num in range(CODE_LENGTH+1):
         f &= ((lst1[num].negate() | lst2[num]) & (lst1[num] | lst2[num].negate()))
+    return f
+
+def equiv_count_lists(lst1, lst2):
+    f = false
+    for num in range(CODE_LENGTH+1):
+        f |= (lst1[num] & lst2[num])
     return f
             
 def count_list(lst):
@@ -142,19 +172,15 @@ def list_total(R, W, C, G):
         for loc in range(CODE_LENGTH):
             count_can_be_white = count_list(code_can_be_white)
             count_prev_W = count_list(W_this_col[:loc])
-            W_true[loc] |= equiv_lists(count_prev_W, max_count(count_can_be_white, count_prev_W)).negate() & W_this_col[loc]
+            W_true[loc] |= equiv_count_lists(count_prev_W, max_count(count_can_be_white, count_prev_W)).negate() & W_this_col[loc]
     W_count = count_list(W_true)
     return R_count, W_count
 
-R_count, W_count = list_total(R, W, C, G)
+R_count, W_count = list_total(Rl, Wl, C, G)
 
-def equiv_label(labels, lst):
-    grid = []
-    for i in range(len(labels)):
-        grid.append((labels[i] | lst[i].negate()) & (labels[i].negate() | lst[i]))
-    return grid
-R_e = equiv_label(Rg, R_count)
-W_e = equiv_label(Wg, W_count)
+
+R_e = equiv_label(Rn, R_count)
+W_e = equiv_label(Wn, W_count)
 
 for r in R_e:
 
