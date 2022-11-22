@@ -149,7 +149,7 @@ R_count, W_count = list_total(R, W, C, G)
 def equiv_label(labels, lst):
     grid = []
     for i in range(len(labels)):
-        grid.append((labels[i].negate() & lst[i].negate()) | (labels[i] & lst[i]))
+        grid.append((labels[i] | lst[i].negate()) & (labels[i].negate() | lst[i]))
     return grid
 R_e = equiv_label(Rg, R_count)
 W_e = equiv_label(Wg, W_count)
@@ -169,6 +169,6 @@ if __name__ == "__main__":
 
     E.add_constraint(set_code_state(guess, G))
 
-    E = E.compile()
+    
 
     print(E.solve())
