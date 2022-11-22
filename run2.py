@@ -80,7 +80,12 @@ def get_white(C, G):
     return grid
 
 W = get_white(C, G)
+<<<<<<< HEAD
+for i, w in enumerate(W):
+    print(i, w.__repr__())
+=======
 # print(W.__repr__())
+>>>>>>> e5c16dc606f74258c1fde3227b683c0a26672d63
 
 def count_num(lst, isnum):
     if isnum == 0:
@@ -105,6 +110,10 @@ def min_count(lst1, lst2):
         grid.append(f1 | f2)
     return grid
 
+<<<<<<< HEAD
+for i, count in enumerate(count_red(R)):
+    print(i, count.__repr__())
+=======
 def max_count(lst1, lst2):
     grid = []
     for num in range(CODE_LENGTH+1):
@@ -126,6 +135,7 @@ def count_list(lst):
     for num in range(CODE_LENGTH+1):
         grid.append(count_num(lst, num))
     return grid
+>>>>>>> e5c16dc606f74258c1fde3227b683c0a26672d63
 
 #for count in count_list(R):
     # print(count.__repr__())
