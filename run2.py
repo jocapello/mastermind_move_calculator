@@ -91,7 +91,7 @@ def count_num(lst, isnum):
     else:
         f = false
         for i, l in enumerate(lst):
-            f |= l & count_list(lst[:i]+lst[i+1:], isnum-1)
+            f |= l & count_num(lst[:i]+lst[i+1:], isnum-1)
         return f
 def min_count(lst1, lst2):
     grid = []
