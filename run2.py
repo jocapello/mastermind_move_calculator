@@ -87,8 +87,9 @@ def get_red(C, G):
     return grid
 
 Rc = get_red(C, G)
+T = T + equiv_label(Rl, Rc)
 # print(R.__repr__())
-def get_white(C, G):
+def get_white(C, G, R):
     grid = []
     for loc in range(CODE_LENGTH):
         f = false
@@ -98,11 +99,11 @@ def get_white(C, G):
         grid.append(f)
     return grid
 
-Wc = get_white(C, G)
+Wc = get_white(C, G, Rl)
 # print(W.__repr__())
 
 
-T = T + equiv_label(Rl, Rc)
+
 T = T + equiv_label(Wl, Wc)
 
 
