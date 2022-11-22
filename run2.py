@@ -82,7 +82,7 @@ def get_white(C, G):
 W = get_white(C, G)
 # print(W.__repr__())
 
-def count_list(lst, isnum):
+def count_num(lst, isnum):
     if isnum == 0:
         f = true
         for l in lst:
@@ -124,10 +124,10 @@ def equiv_lists(lst1, lst2):
 def count_list(lst):
     grid = []
     for num in range(CODE_LENGTH+1):
-        grid.append(count_list(lst, num))
+        grid.append(count_num(lst, num))
     return grid
 
-for count in count_list(R):
+#for count in count_list(R):
     # print(count.__repr__())
 
 def list_total(R, W, C, G):
