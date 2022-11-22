@@ -120,6 +120,7 @@ def equiv_lists(lst1, lst2):
     f = true
     for num in range(CODE_LENGTH+1):
         f &= lst1[num] & lst2[num]
+    return f
             
 def count_list(lst):
     grid = []
@@ -149,6 +150,7 @@ def equiv_label(labels, lst):
     grid = []
     for i in range(len(labels)):
         grid.append((labels[i].negate() & lst[i].negate()) | (labels[i] & lst[i]))
+    return grid
 R_e = equiv_label(Rg, R_count)
 W_e = equiv_label(Wg, W_count)
 
