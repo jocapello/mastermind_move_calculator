@@ -194,20 +194,29 @@ R_e = equiv_label(Rn, R_count)
 W_e = equiv_label(Wn, W_count)
 
 for r in R_e:
-
     T.append(r)
 for w in W_e:
-
     T.append(w)
 
 if __name__ == "__main__":
-    code = input("enter colors here: ").split(",")
-    guess = input("enter guess here: ").split(",")
+
+    iswrong = True
+    code = input("enter colors here: ").split(",") # For testing purposes
+    while iswrong:
+        iswrong = False
+    
+        print("Available colours are: ", [colour.capitalize() for colour in COLORS], "\n")
+        guess = input("enter guess here seperated by a comma: ").lower().split(",")
+        for i in range(len(guess)):
+            if guess[i] not in COLORS:
+                print('You have entered an invalid colour, try again')
+                iswrong = True
+
 
     T.append(set_code_state(code, C))
 
     T.append(set_code_state(guess, G))
 
-    
+    # print(len(T))
     T_com = And(T)
     print(T_com.solve())
