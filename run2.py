@@ -1,15 +1,31 @@
-from bauhaus import Encoding, proposition, constraint
-from bauhaus.utils import count_solutions, likelihood
-from nnf import Var, And
+from nnf import Var, And, Or
 from nnf import true, false
+from nnf import dsharp
 # Encoding that will store all of your constraints
-E = Encoding()
+
+
+#creating new encoding class
+class Encoding():
+    def __init__(self):
+        self.constraints = []
+
+    
+    def add_constraint(self, constraint):
+        self.constraints.append(constraint)
+    def add_constraint_list(self, constraints):
+        self.constraints = self.constraints + constraints
+    def compile(self):
+        return And(self.constraints)
+    def solve(self, variables = None):
+        return self.constraints.solve()
+
+
 
 COLORS = ["red", "green", "blue", "purple", "yellow", "white"]
 COLORS_LENGTH = len(COLORS)
 CODE_LENGTH = 4
 
-T = []
+T = Encoding()
 
 
 def iff(A, B):
@@ -44,6 +60,45 @@ def equiv_label(labels, lst):
     return grid
 
 
+def set_code_constraints(grid):
+    constraints = []
+    
+    for loc in grid:
+        
+        for y, col in enumerate(loc):
+            f = true
+            for y2, col2 in enumerate(loc):
+                if y != y2:
+                    f &= col2.negate()
+            constraints.append(iff(col, f))
+        
+    return constraints
+
+def set_num_constraints(grid):
+    constraints = []
+    
+    for n, num in enumerate(grid):
+        f = true
+        for n2, num2 in enumerate(grid):
+            if n != n2:
+                f &= num2.negate()
+        constraints.append(iff(num, f))
+        
+    return constraints
+    
+
+def set_num_state(num, grid):
+    f = true
+    
+    for n, numc in enumerate(grid):
+        if n == num:
+
+        
+            f &= numc
+        
+    return f
+
+
 
 def set_code_state(code, grid):
     f = true
@@ -51,8 +106,6 @@ def set_code_state(code, grid):
         for y, col in enumerate(COLORS):
             if color == col:
                 f &= grid[x][y]
-            else:
-                f &= grid[x][y].negate()
     return f
 
 def set_peg_state(pegs, grid):
@@ -141,7 +194,7 @@ def list_total(R, W, C, G):
     R_count = count_list(R)
     W_true = [false for i in range(CODE_LENGTH)]
     for col in range(COLORS_LENGTH):
-        code_can_be_white = [C[loc][col] | (R[loc] & G[loc][col]).negate() for loc in range(CODE_LENGTH)]
+        code_can_be_white = [C[loc][col] & R[loc].negate() for loc in range(CODE_LENGTH)]
         W_this_col = [G[loc][col] & W[loc] for loc in range(CODE_LENGTH)]
         for loc in range(CODE_LENGTH):
             count_can_be_white = count_list(code_can_be_white)
@@ -155,8 +208,10 @@ def list_total(R, W, C, G):
 
 #this is the code proposition
 C = init_code("C")
+T.add_constraint_list(set_code_constraints(C))
 #this is the guess proposition
 G = init_code("G")
+T.add_constraint_list(set_code_constraints(G))
 
 Rl = init_loc_peg("Rl")
 
@@ -164,14 +219,15 @@ Wl = init_loc_peg("Wl")
 
 #number of red pegs
 Rn = init_peg("Rn")
+T.add_constraint_list(set_num_constraints(Rn))
 #number of white pegs
 Wn = init_peg("Wn")
-
+T.add_constraint_list(set_num_constraints(Wn))
 
 
 
 Rc = get_red(C, G)
-T = T + equiv_label(Rl, Rc)
+T.add_constraint_list(equiv_label(Rl, Rc))
 # print(R.__repr__())
 
 
@@ -180,7 +236,7 @@ Wc = get_white(C, G, Rl)
 
 
 
-T = T + equiv_label(Wl, Wc)
+T.add_constraint_list(equiv_label(Wl, Wc))
 
 
 
@@ -193,21 +249,19 @@ R_count, W_count = list_total(Rl, Wl, C, G)
 R_e = equiv_label(Rn, R_count)
 W_e = equiv_label(Wn, W_count)
 
-for r in R_e:
+T.add_constraint_list(R_e)
+T.add_constraint_list(W_e)
 
-    T.append(r)
-for w in W_e:
-
-    T.append(w)
 
 if __name__ == "__main__":
     code = input("enter colors here: ").split(",")
+    T.add_constraint(set_code_state(code, C))
+
     guess = input("enter guess here: ").split(",")
-
-    T.append(set_code_state(code, C))
-
-    T.append(set_code_state(guess, G))
-
+    T.add_constraint(set_code_state(guess, G))
+    # T.add_constraint(set_num_state(int(input("enter num reds here: ")), Rn))
+    # T.add_constraint(set_num_state(int(input("enter num whites here: ")), Wn))
     
-    T_com = And(T)
-    print(T_com.solve())
+    T = T.compile()
+    #dsharp.compile(T.to_CNF(), smooth=True).model_count()
+    print(T.solve())
