@@ -36,20 +36,6 @@ def init_peg(type_of):
         grid.append(Var(f'{type_of}_{num}'))
     return grid
 
-#this is the code proposition
-C = init_code("C")
-#this is the guess proposition
-G = init_code("G")
-
-Rl = init_loc_peg("Rl")
-
-Wl = init_loc_peg("Wl")
-
-#number of red pegs
-Rn = init_peg("Rn")
-#number of white pegs
-Wn = init_peg("Wn")
-
 
 def equiv_label(labels, lst):
     grid = []
@@ -75,8 +61,6 @@ def set_peg_state(pegs, grid):
         grid[x] == truth
     return f
 
-# print(set_code_state(code, C).__repr__())
-# print(set_code_state(guess, G).__repr__())
 
 def get_red(C, G):
     grid = []
@@ -87,9 +71,7 @@ def get_red(C, G):
         grid.append(f)
     return grid
 
-Rc = get_red(C, G)
-T = T + equiv_label(Rl, Rc)
-# print(R.__repr__())
+
 def get_white(C, G, R):
     grid = []
     for loc in range(CODE_LENGTH):
@@ -99,15 +81,6 @@ def get_white(C, G, R):
                 f |= R[loc].negate() & R[loc2].negate() & G[loc][col] & C[loc2][col]
         grid.append(f)
     return grid
-
-Wc = get_white(C, G, Rl)
-# print(W.__repr__())
-
-
-
-T = T + equiv_label(Wl, Wc)
-
-
 
 
 def count_num(lst, isnum):
@@ -162,21 +135,57 @@ def count_list(lst):
         grid.append(count_num(lst, num))
     return grid
 
-#for count in count_list(R):
-    # print(count.__repr__())
+
 
 def list_total(R, W, C, G):
     R_count = count_list(R)
     W_true = [false for i in range(CODE_LENGTH)]
     for col in range(COLORS_LENGTH):
         code_can_be_white = [C[loc][col] | (R[loc] & G[loc][col]).negate() for loc in range(CODE_LENGTH)]
-        W_this_col = [G[loc][col] | W[loc] for loc in range(CODE_LENGTH)]
+        W_this_col = [G[loc][col] & W[loc] for loc in range(CODE_LENGTH)]
         for loc in range(CODE_LENGTH):
             count_can_be_white = count_list(code_can_be_white)
             count_prev_W = count_list(W_this_col[:loc])
             W_true[loc] |= equiv_count_lists(count_prev_W, max_count(count_can_be_white, count_prev_W)).negate() & W_this_col[loc]
     W_count = count_list(W_true)
     return R_count, W_count
+
+
+
+
+#this is the code proposition
+C = init_code("C")
+#this is the guess proposition
+G = init_code("G")
+
+Rl = init_loc_peg("Rl")
+
+Wl = init_loc_peg("Wl")
+
+#number of red pegs
+Rn = init_peg("Rn")
+#number of white pegs
+Wn = init_peg("Wn")
+
+
+
+
+Rc = get_red(C, G)
+T = T + equiv_label(Rl, Rc)
+# print(R.__repr__())
+
+
+Wc = get_white(C, G, Rl)
+# print(W.__repr__())
+
+
+
+T = T + equiv_label(Wl, Wc)
+
+
+
+
+
 
 R_count, W_count = list_total(Rl, Wl, C, G)
 
