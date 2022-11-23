@@ -1,4 +1,4 @@
-dic = {}
+dic = {'Wl_0': False, 'Rn_4': True, 'Rn_3': False, 'Rl_0': True, 'Rl_1': True, 'Wn_3': False, 'Wn_4': True, 'Rn_2': False, 'Rl_2': True, 'Rn_1': False, 'Wl_1': False, 'Wl_2': False, 'Wn_1': False, 'Wn_2': False, 'Rl_3': True, 'Rn_0': False, 'G_2_r': False, 'C_2_p': False, 'G_1_b': False, 'G_0_r': True, 'G_1_w': False, 'G_3_y': False, 'C_3_g': False, 'C_1_p': False, 'C_2_y': False, 'G_2_y': False, 'C_2_w': False, 'G_0_y': False, 'C_1_r': False, 'Wn_0': False, 'C_0_p': False, 'Wl_3': False, 'C_0_b': False, 'G_1_p': False, 'G_1_r': False, 'G_3_b': False, 'G_1_g': True, 'C_3_p': False, 'G_2_w': False, 'C_1_g': False, 'C_2_b': False, 'C_0_g': False, 'C_3_w': True, 'G_2_b': True, 'G_3_p': True, 'G_0_g': False, 'C_2_g': True, 'G_0_w': False, 'G_3_g': False, 'C_3_y': False, 'C_3_b': False, 'C_0_r': True, 'C_1_w': False, 'C_0_w': False, 'C_3_r': False, 'G_3_r': False, 'C_1_b': True, 'C_1_y': False, 'G_2_g': False, 'C_0_y': False, 'C_2_r': False, 'G_1_y': False, 'G_0_p': False, 'G_2_p': False, 'G_0_b': False, 'G_3_w': False}
 
 
 
@@ -47,12 +47,9 @@ Rn = init_peg("Rn")
 #number of white pegs
 Wn = init_peg("Wn")
 
-for s in C:
-    print(s+": "+str(dic[s]))
 
-for s in C:
-    print(s+": "+str(dic[s]))
-
+print(Rl)
+print(Wl)
 for s in Rl:
     print(s+": "+str(dic[s]))
 

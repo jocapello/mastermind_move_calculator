@@ -12,7 +12,8 @@ CODE_LENGTH = 4
 T = []
 
 
-
+def iff(A, B):
+    return (A|B.negate()) & (B|A.negate())
 
 def init_code(type_of):
     pos_grid = []
@@ -53,7 +54,7 @@ Wn = init_peg("Wn")
 def equiv_label(labels, lst):
     grid = []
     for i in range(len(labels)):
-        grid.append((labels[i] | lst[i].negate()) & (labels[i].negate() | lst[i]))
+        grid.append(iff(labels[i], lst[i]))
     return grid
 
 
@@ -146,7 +147,7 @@ def max_count(lst1, lst2):
 def equiv_lists(lst1, lst2):
     f = true
     for num in range(CODE_LENGTH+1):
-        f &= ((lst1[num].negate() | lst2[num]) & (lst1[num] | lst2[num].negate()))
+        f &= iff(lst1[num], lst2[num])
     return f
 
 def equiv_count_lists(lst1, lst2):
