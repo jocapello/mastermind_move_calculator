@@ -1,14 +1,9 @@
 from nnf import Var, And, Or
 from nnf import true, false
-#from nnf import dsharp
+from nnf import dsharp
 # Encoding that will store all of your constraints
 
 
-COLORS = ["red", "green", "blue", "purple", "yellow", "white"]
-COLORS_LENGTH = len(COLORS)
-CODE_LENGTH = 4
-
-T = Encoding()
 #creating new encoding class
 class Encoding():
     def __init__(self):
@@ -26,6 +21,11 @@ class Encoding():
 
 
 
+COLORS = ["red", "green", "blue", "purple", "yellow", "white"]
+COLORS_LENGTH = len(COLORS)
+CODE_LENGTH = 4
+
+T = Encoding()
 
 
 def iff(A, B):
