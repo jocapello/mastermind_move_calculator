@@ -1,13 +1,14 @@
 from nnf import Var, And, Or
 from nnf import true, false
 from nnf import dsharp
-# Encoding that will store all of your constraints
+from config import *
 
 
 #creating new encoding class
 class Encoding():
     def __init__(self):
         self.constraints = []
+        self.theory = None
 
     
     def add_constraint(self, constraint):
@@ -17,15 +18,11 @@ class Encoding():
     def compile(self):
         return And(self.constraints)
     def solve(self, variables = None):
-        return self.constraints.solve()
+        self.theory = self.compile
+        return self.theory.solve()
 
 
 
-COLORS = ["red", "green", "blue", "purple", "yellow", "white"]
-COLORS_LENGTH = len(COLORS)
-CODE_LENGTH = 4
-
-T = Encoding()
 
 
 def iff(A, B):
@@ -203,65 +200,52 @@ def list_total(R, W, C, G):
     W_count = count_list(W_true)
     return R_count, W_count
 
+def get_game_constraints(C, G, Rl, Wl, Rn, Wn):
+    T = Encoding()
+
+
+    #this is the code proposition
+    T.add_constraint_list(set_code_constraints(C))
+    #this is the guess proposition
+    T.add_constraint_list(set_code_constraints(G))
 
 
 
-#this is the code proposition
-C = init_code("C")
-T.add_constraint_list(set_code_constraints(C))
-#this is the guess proposition
-G = init_code("G")
-T.add_constraint_list(set_code_constraints(G))
+    #number of red pegs
 
-Rl = init_loc_peg("Rl")
+    T.add_constraint_list(set_num_constraints(Rn))
+    #number of white pegs
 
-Wl = init_loc_peg("Wl")
-
-#number of red pegs
-Rn = init_peg("Rn")
-T.add_constraint_list(set_num_constraints(Rn))
-#number of white pegs
-Wn = init_peg("Wn")
-T.add_constraint_list(set_num_constraints(Wn))
+    T.add_constraint_list(set_num_constraints(Wn))
 
 
 
-Rc = get_red(C, G)
-T.add_constraint_list(equiv_label(Rl, Rc))
-# print(R.__repr__())
+    Rc = get_red(C, G)
+    T.add_constraint_list(equiv_label(Rl, Rc))
+    # print(R.__repr__())
 
 
-Wc = get_white(C, G, Rl)
-# print(W.__repr__())
+    Wc = get_white(C, G, Rl)
+    # print(W.__repr__())
 
 
 
-T.add_constraint_list(equiv_label(Wl, Wc))
+    T.add_constraint_list(equiv_label(Wl, Wc))
 
 
 
 
 
 
-R_count, W_count = list_total(Rl, Wl, C, G)
+    R_count, W_count = list_total(Rl, Wl, C, G)
 
 
-R_e = equiv_label(Rn, R_count)
-W_e = equiv_label(Wn, W_count)
+    R_e = equiv_label(Rn, R_count)
+    W_e = equiv_label(Wn, W_count)
 
-T.add_constraint_list(R_e)
-T.add_constraint_list(W_e)
+    T.add_constraint_list(R_e)
+    T.add_constraint_list(W_e)
 
-
-if __name__ == "__main__":
-    code = input("enter colors here: ").split(",")
-    T.add_constraint(set_code_state(code, C))
-
-    guess = input("enter guess here: ").split(",")
-    T.add_constraint(set_code_state(guess, G))
-    # T.add_constraint(set_num_state(int(input("enter num reds here: ")), Rn))
-    # T.add_constraint(set_num_state(int(input("enter num whites here: ")), Wn))
     
-    T = T.compile()
-    #dsharp.compile(T.to_CNF(), smooth=True).model_count()
-    print(T.solve())
+
+    return T.compile()
