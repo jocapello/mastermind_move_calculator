@@ -18,7 +18,7 @@ class Encoding():
     def compile(self):
         return And(self.constraints)
     def solve(self, variables = None):
-        self.theory = self.compile
+        self.theory = self.compile()
         return self.theory.solve()
 
 
@@ -144,6 +144,14 @@ def count_num(lst, isnum):
         for i, l in enumerate(lst):
             f |= l & count_num(lst[:i]+lst[i+1:], isnum-1)
         return f
+
+
+def count_list(lst):
+    grid = []
+    for num in range(CODE_LENGTH+1):
+        grid.append(count_num(lst, num))
+    return grid
+
 def min_count(lst1, lst2):
     grid = []
     for num in range(CODE_LENGTH+1):
@@ -179,11 +187,7 @@ def equiv_count_lists(lst1, lst2):
         f |= (lst1[num] & lst2[num])
     return f
             
-def count_list(lst):
-    grid = []
-    for num in range(CODE_LENGTH+1):
-        grid.append(count_num(lst, num))
-    return grid
+
 
 
 

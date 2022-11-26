@@ -1,6 +1,6 @@
 from nnf import Var, And, Or
 from nnf import true, false
-from nnf import dsharp
+from nnf import dsharp, kissat
 from utils import *
 from config import *
 # Encoding that will store all of your constraints
@@ -107,4 +107,4 @@ if __name__ == "__main__":
     
     
     #dsharp.compile(T.to_CNF(), smooth=True).model_count()
-    print(game.solve(return_true_only = True))
+    print(game.solve(return_true_only = False))
