@@ -142,7 +142,7 @@ def count_num(lst, isnum):
     else:
         f = false
         for i, l in enumerate(lst):
-            f |= l & count_num(lst[:i]+lst[i+1:], isnum-1)
+            f |= l & count_num(lst[:i], 0) & count_num(lst[i+1:], isnum-1)
         return f
 
 
