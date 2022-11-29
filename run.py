@@ -80,6 +80,8 @@ class Game():
                 return filtered_sol
             else:
                 return solution
+    def model_count(self):
+        return self.compile().model_count()
     
 
             
@@ -96,15 +98,16 @@ class Game():
 
 if __name__ == "__main__":
     game = Game()
-    code = input("enter colors here: ").split(",")
+    #code = input("enter colors here: ").split(",")
 
     guess = input("enter guess here: ").split(",")
-    # int(input("enter num reds here: "))
-    # int(input("enter num whites here: "))
-    game.set_code(code)
-    game.set_guess(guess)
+    rn = int(input("enter num reds here: "))
+    wn =  int(input("enter num whites here: "))
+    #game.set_code(code)
+    #game.set_guess(guess)
+    game.set_guess_pegs(guess, rn, wn)
     game.set_game_state()
     
     
     #dsharp.compile(T.to_CNF(), smooth=True).model_count()
-    print(game.solve(return_true_only = False))
+    print(game.model_count())
