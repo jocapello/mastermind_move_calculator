@@ -16,7 +16,7 @@ def get_code_input(tp):
         code = re.match('.*?(\w+).*?(\w+).*?(\w+).*?(\w+).*?', code)
         code = [code[i] for i in range(1, 5)]
         for i in range(len(code)):
-            if code[i] not in COLORS:
+            if code[i][0] not in [c[0] for c in COLORS]:
                 print(f'You have entered an invalid colour at {i+1}, try again')
                 iswrong = True
     return code

@@ -23,9 +23,21 @@ class Game():
         self.constraints = []
         self.E = Encoding()
         self.T = None
+        self.vars = {}
+        for v in self.flatten([self.C, self.G, self.Rl, self.Wl, self.Rn, self.Wn]):
+            self.vars[v.__repr__()] = v
+        self.hypothetical = []
+        
         
 
-
+    def flatten(self, lsts):
+        flat = []
+        for lst in lsts:
+            if type(lst) != type([]):
+                flat.append(lst)
+            else:
+                flat = flat + self.flatten(lst)
+        return flat
     def set_code(self, code):
         self.code = code
     def set_guess(self, guess):
@@ -52,15 +64,14 @@ class Game():
     def set_guess_pegs(self, guess, nred, nwhite):
         guess_con = set_code_state(guess, self.G)
         peg_con = set_num_state(nred, self.Rn) & set_num_state(nwhite, self.Wn)
-        self.constraints.append(iff(guess_con, peg_con))
+        self.hypothetical.append([[v.__repr__() for v in self.flatten(self.C)] ,guess_con & peg_con])
+        #self.constraints.append(iff(guess_con, peg_con))
     def compile(self):
         self.E.add_constraint(self.rules)
         self.E.add_constraint_list(self.constraints)
         self.T = self.E.compile()
         return self.T
-    def solve(self, return_true_only = False, variables = None):
-        self.T = self.compile()
-        solution = self.T.solve()
+    def filter(self, solution, return_true_only = False, variables = None):
         if return_true_only:
             truths = []
             for key in solution:
@@ -80,9 +91,51 @@ class Game():
                 return filtered_sol
             else:
                 return solution
+    def solve(self, return_true_only = False, variables = None):
+        self.T = self.compile()
+        solution = self.T.solve()
+        return filter(solution, return_true_only = return_true_only, variables = variables)
+    def models(self):
+        return self.compile().models()
     def model_count(self):
         return self.compile().model_count()
-    
+
+    def model_iter(self, models, names):
+        for model in models:
+            yield {
+                name: value
+                for name, value in model.items()
+                if name in names
+            }
+    def hyp_constraints(self):
+        new_constraints = []
+        T = self.compile()
+        
+
+        for hyp in self.hypothetical:
+            T_temp = And([T, hyp[1], And(new_constraints)])
+            
+
+            names = frozenset(hyp[0])
+            models = T_temp.to_CNF().models()
+            f = false
+            for model in self.model_iter(models, names):
+                fa = true
+                for name, value in model.items():
+                    if value:
+                        fa &= self.vars[name]
+                    else:
+                        fa &= self.vars[name].negate()
+                f |= fa
+            new_constraints.append(f)
+        # T_temp = And([T, And(new_constraints)])
+        # names = frozenset(T_temp.vars())
+        # models = T_temp.to_CNF().models()
+        # return self.model_iter(models, names)
+        self.constraints = self.constraints + new_constraints
+        return new_constraints
+            
+        #return self.compile().to_CNF().models()
 
             
                 
@@ -95,21 +148,29 @@ class Game():
 
 
 
-
 if __name__ == "__main__":
     game = Game()
     print("Available colours are: ", [colour.capitalize() for colour in COLORS], "\n")
     # code = get_code_input("code")
-
-    guess = get_code_input("guess")
-    rn = int(input("enter num reds here: "))
-    wn =  int(input("enter num whites here: "))
-    # game.set_code(code)
-    # game.set_guess(guess)
-    game.set_guess_pegs(guess, rn, wn)
-    game.set_game_state()
-    
+    num_g = int(input("number of past guesses: "))
+    for n in range(num_g): 
+        guess = get_code_input("guess")
+        rn = int(input("enter num reds here: "))
+        wn =  int(input("enter num whites here: "))
+        # game.set_code(code)
+        # game.set_guess(guess)
+        game.set_guess_pegs(guess, rn, wn)
+    hyp_constraints = game.hyp_constraints()
+    models = And(hyp_constraints).models()
+    for m in models:
+        print(game.filter(m, return_true_only = True))
+    #game.set_game_state()
+    #print(game.compile().to_CNF())
     
     #dsharp.compile(T.to_CNF(), smooth=True).model_count()
-    print(game.model_count())
+    
+    # for m in game.model_hyp():
+    #     #print(m)
+    #     print(game.filter(m, return_true_only = True))
+    #     print(game.filter(m, return_true_only = True, variables=[v.__repr__() for v in game.flatten(game.C)]))
     #print(game.solve())
