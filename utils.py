@@ -2,7 +2,24 @@ from nnf import Var, And, Or
 from nnf import true, false
 from nnf import dsharp
 from config import *
+import re
 
+
+
+
+def get_code_input(tp):
+    
+    iswrong = True
+    while iswrong:
+        iswrong = False
+        code = input(f'Enter {tp} here: ').lower()
+        code = re.match('.*?(\w+).*?(\w+).*?(\w+).*?(\w+).*?', code)
+        code = [code[i] for i in range(1, 5)]
+        for i in range(len(code)):
+            if code[i] not in COLORS:
+                print(f'You have entered an invalid colour at {i+1}, try again')
+                iswrong = True
+    return code
 
 #creating new encoding class
 class Encoding():
@@ -225,7 +242,8 @@ def get_game_constraints(C, G, Rl, Wl, Rn, Wn):
 
 
     Rc = get_red(C, G)
-    T.add_constraint_list(equiv_label(Rl, Rc))
+    # T.add_constraint_list(equiv_label(Rl, Rc))
+    Rl = Rc
     # print(R.__repr__())
 
 
@@ -234,8 +252,8 @@ def get_game_constraints(C, G, Rl, Wl, Rn, Wn):
 
 
 
-    T.add_constraint_list(equiv_label(Wl, Wc))
-
+    # T.add_constraint_list(equiv_label(Wl, Wc))
+    Wl = Wc
 
 
 

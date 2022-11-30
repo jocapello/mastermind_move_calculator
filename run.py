@@ -98,16 +98,18 @@ class Game():
 
 if __name__ == "__main__":
     game = Game()
-    #code = input("enter colors here: ").split(",")
+    print("Available colours are: ", [colour.capitalize() for colour in COLORS], "\n")
+    # code = get_code_input("code")
 
-    guess = input("enter guess here: ").split(",")
+    guess = get_code_input("guess")
     rn = int(input("enter num reds here: "))
     wn =  int(input("enter num whites here: "))
-    #game.set_code(code)
-    #game.set_guess(guess)
+    # game.set_code(code)
+    # game.set_guess(guess)
     game.set_guess_pegs(guess, rn, wn)
     game.set_game_state()
     
     
     #dsharp.compile(T.to_CNF(), smooth=True).model_count()
     print(game.model_count())
+    #print(game.solve())
