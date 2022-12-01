@@ -13,8 +13,9 @@ def get_code_input(tp):
     while iswrong:
         iswrong = False
         code = input(f'Enter {tp} here: ').lower()
-        code = re.match('.*?(\w+).*?(\w+).*?(\w+).*?(\w+).*?', code)
-        code = [code[i] for i in range(1, 5)]
+        pattern = ".*?(\w+)"*CODE_LENGTH + '.*?'
+        code = re.match(pattern, code)
+        code = [code[i] for i in range(1, CODE_LENGTH+1)]
         for i in range(len(code)):
             if code[i][0] not in [c[0] for c in COLORS]:
                 print(f'You have entered an invalid colour at {i+1}, try again')
@@ -118,7 +119,7 @@ def set_code_state(code, grid):
     f = true
     for x, color in enumerate(code):
         for y, col in enumerate(COLORS):
-            if color == col:
+            if color[0] == col[0]:
                 f &= grid[x][y]
     return f
 
@@ -221,7 +222,7 @@ def list_total(R, W, C, G):
     W_count = count_list(W_true)
     return R_count, W_count
 
-def get_game_constraints(C, G, Rl, Wl, Rn, Wn):
+def get_game_constraints(C, G, Rn, Wn):
     T = Encoding()
 
 
@@ -243,23 +244,23 @@ def get_game_constraints(C, G, Rl, Wl, Rn, Wn):
 
     Rc = get_red(C, G)
     # T.add_constraint_list(equiv_label(Rl, Rc))
-    Rl = Rc
+    #Rl = Rc
     # print(R.__repr__())
 
 
-    Wc = get_white(C, G, Rl)
+    Wc = get_white(C, G, Rc)
     # print(W.__repr__())
 
 
 
     # T.add_constraint_list(equiv_label(Wl, Wc))
-    Wl = Wc
+    #Wl = Wc
 
 
 
 
 
-    R_count, W_count = list_total(Rl, Wl, C, G)
+    R_count, W_count = list_total(Rc, Wc, C, G)
 
 
     R_e = equiv_label(Rn, R_count)

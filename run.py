@@ -11,11 +11,9 @@ class Game():
         
         self.C = init_code("C")
         self.G = init_code("G")
-        self.Rl = init_loc_peg("Rl")
-        self.Wl = init_loc_peg("Wl")
         self.Rn = init_peg("Rn")
         self.Wn = init_peg("Wn")
-        self.rules = get_game_constraints(self.C, self.G, self.Rl, self.Wl, self.Rn, self.Wn)
+        self.rules = get_game_constraints(self.C, self.G, self.Rn, self.Wn)
         self.code = code
         self.guess = guess
         self.num_red = num_red
@@ -24,11 +22,13 @@ class Game():
         self.E = Encoding()
         self.T = None
         self.vars = {}
-        for v in self.flatten([self.C, self.G, self.Rl, self.Wl, self.Rn, self.Wn]):
+        for v in self.flatten([self.C, self.G, self.Rn, self.Wn]):
             self.vars[v.__repr__()] = v
         self.hypothetical = []
+        self.hyp_constraints = []
         
         
+
 
     def flatten(self, lsts):
         flat = []
@@ -57,7 +57,14 @@ class Game():
             self.constraints.append(set_num_state(self.num_white, self.Wn))
     def wipe_game_state(self):
         self.constraints = []
+        self.hyp_constraints = []
+        self.hypothetical = []
         self.set_code(None)
+        self.set_guess(None)
+        self.set_red(None)
+        self.set_white(None)
+    def wipe_guess(self):
+        self.constraints = []
         self.set_guess(None)
         self.set_red(None)
         self.set_white(None)
@@ -70,6 +77,7 @@ class Game():
         self.E.add_constraint(self.rules)
         self.E.add_constraint_list(self.constraints)
         self.T = self.E.compile()
+        self.E = Encoding()
         return self.T
     def filter(self, solution, return_true_only = False, variables = None):
         if return_true_only:
@@ -94,7 +102,7 @@ class Game():
     def solve(self, return_true_only = False, variables = None):
         self.T = self.compile()
         solution = self.T.solve()
-        return filter(solution, return_true_only = return_true_only, variables = variables)
+        return self.filter(solution, return_true_only = return_true_only, variables = variables)
     def models(self):
         return self.compile().models()
     def model_count(self):
@@ -107,7 +115,10 @@ class Game():
                 for name, value in model.items()
                 if name in names
             }
-    def hyp_constraints(self):
+
+    def add_constraints(self, constraints):
+        self.constraints = self.constraints + constraints
+    def get_hyp_constraints(self):
         new_constraints = []
         T = self.compile()
         
@@ -132,7 +143,7 @@ class Game():
         # names = frozenset(T_temp.vars())
         # models = T_temp.to_CNF().models()
         # return self.model_iter(models, names)
-        self.constraints = self.constraints + new_constraints
+        self.hyp_constraints = new_constraints
         return new_constraints
             
         #return self.compile().to_CNF().models()
