@@ -39,7 +39,7 @@ class GameLoop():
 
     def get_possible_codes(self):
         
-        hyp_codes = And(self.game.get_hyp_constraints()).models()
+        hyp_codes = And(self.game.get_hyp_constraints()+set_code_constraints(self.game.C)).models()
         for codem in hyp_codes:
             yield self.game.filter(codem, return_true_only = True)
         
@@ -49,6 +49,7 @@ class GameLoop():
     
     def text_game_loop(self):
         running = True
+        self.restart()
         this_code = self.set_code_random()
 
         while running:
@@ -61,13 +62,13 @@ class GameLoop():
                 print(" ".join(this_code))
             elif command == "makeguess":
                 rn, wn = self.make_guess(get_code_input("guess"))
-                if rn == 4:
+                if rn == CODE_LENGTH:
                     print("congradulations, you got the correct guess!")
                 else:
                     print(f'incorrect guess, you got {rn} red pegs and {wn} white pegs')
             elif command == "assist":
                 for codem in self.get_possible_codes():
-                    code = ["n/a" for _ in range(4)]
+                    code = ["n/a" for _ in range(CODE_LENGTH)]
                     for var in codem:
                         code[int(var[2])] = var[4]
                     print(" ".join(code))
@@ -76,6 +77,7 @@ class GameLoop():
         return self.game
     def text_game_loop_debug(self, inputs):
         running = True
+        self.restart()
         this_code = self.set_code_random()
         n = 0
         while running:
@@ -91,13 +93,13 @@ class GameLoop():
             elif command == "makeguess":
                 print(", ".join(inputs[n][1]))
                 rn, wn = self.make_guess(inputs[n][1])
-                if rn == 4:
+                if rn == CODE_LENGTH:
                     print("congradulations, you got the correct guess!")
                 else:
                     print(f'incorrect guess, you got {rn} red pegs and {wn} white pegs')
             elif command == "assist":
                 for codem in self.get_possible_codes():
-                    code = ["n/a" for _ in range(4)]
+                    code = ["n/a" for _ in range(CODE_LENGTH)]
                     for var in codem:
                         code[int(var[2])] = var[4]
                     print(" ".join(code))
