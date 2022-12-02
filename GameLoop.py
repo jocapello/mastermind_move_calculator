@@ -39,7 +39,7 @@ class GameLoop():
 
     def get_possible_codes(self):
         
-        hyp_codes = And(self.game.get_hyp_constraints()+set_code_constraints(self.game.C)).models()
+        hyp_codes = dsharp.compile(And(self.game.get_hyp_constraints()+set_code_constraints(self.game.C)).to_CNF()).models()
         for codem in hyp_codes:
             yield self.game.filter(codem, return_true_only = True)
         

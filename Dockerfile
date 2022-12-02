@@ -4,7 +4,7 @@ FROM ubuntu:20.04
 LABEL maintainer="Christian Muise <christian.muise@queensu.ca>"
 
 # install system-wide deps for python
-RUN apt-get update
+RUN apt-get -yqq update
 RUN apt-get -yqq install python3-pip python3-dev curl gnupg build-essential vim git
 
 # copy our application code

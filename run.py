@@ -4,6 +4,7 @@ from nnf import dsharp, kissat
 from utils import *
 from config import *
 import random
+
 # Encoding that will store all of your constraints
 
 
@@ -102,7 +103,7 @@ class Game():
                 return solution
     def solve(self, return_true_only = False, variables = None):
         self.T = self.compile()
-        solution = self.T.solve()
+        solution = dsharp.compile(self.T.to_CNF()).solve()
         return self.filter(solution, return_true_only = return_true_only, variables = variables)
     def models(self):
         return self.compile().models()
@@ -276,6 +277,7 @@ test_input_1 = [
 
 if __name__ == "__main__":
     gl = GameLoop()
-    gl.text_game_loop_debug(test_input_1)
-    gl.text_game_loop_debug(test_input_1)
-    gl.text_game_loop_debug(test_input_1)
+    gl.text_game_loop()
+    # gl.text_game_loop_debug(test_input_1)
+    # gl.text_game_loop_debug(test_input_1)
+    # gl.text_game_loop_debug(test_input_1)

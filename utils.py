@@ -3,6 +3,8 @@ from nnf import true, false
 from nnf import dsharp
 from config import *
 import re
+from bauhaus import Encoding as Enc
+import nnf
 
 
 
@@ -38,7 +40,54 @@ class Encoding():
     def solve(self, variables = None):
         self.theory = self.compile()
         return self.theory.solve()
+    def pprint(self, formula, solution = None, var_level=False):
+        """Pretty print an NNF formula
 
+        Arguments
+        ---------
+        formula : NNF
+            Formula to be displayed.
+        solution : dictionary
+            Optional; A solution to use to highlight output.
+        var_level : boolean
+            Defaults to False; If True, output coloring will be based on the
+            variable instead of the literal.
+        """
+
+        def _process(f):
+            if isinstance(f, nnf.Var):
+                if solution:
+                    if var_level:
+                        color = {True: "\u001b[32m", False: "\u001b[31m"}[
+                            solution[f.name]
+                        ]
+                        return (
+                            {True: "", False: "¬"}[f.true]
+                            + color
+                            + str(f.name)
+                            + "\u001b[0m"
+                        )
+                    else:
+                        val = solution[f.name]
+                        if not f.true:
+                            val = not val
+                        color = {True: "\u001b[32m", False: "\u001b[31m"}[val]
+                        return (
+                            color
+                            + {True: "", False: "¬"}[f.true]
+                            + str(f.name)
+                            + "\u001b[0m"
+                        )
+                else:
+                    return {True: "", False: "¬"}[f.true] + str(f.name)
+            elif isinstance(f, nnf.And):
+                return "(" + " ∧ ".join([_process(i) for i in f]) + ")"
+            elif isinstance(f, nnf.Or):
+                return "(" + " ∨ ".join([_process(i) for i in f]) + ")"
+            else:
+                raise TypeError("Can only pprint an NNF object. Given %s" % type(f))
+
+        print(_process(formula))
 
 
 
