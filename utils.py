@@ -7,8 +7,10 @@ from bauhaus import Encoding as Enc
 import nnf
 
 
+# Utils file, all proposition reating functions are here
 
 
+# gets the color sequence from the user and makes sure that it is compatible with other functions
 def get_code_input(tp):
     
     iswrong = True
@@ -40,6 +42,7 @@ class Encoding():
     def solve(self, variables = None):
         self.theory = self.compile()
         return self.theory.solve()
+    # pretty print function migrated from the bauhaus source code
     def pprint(self, formula, solution = None, var_level=False):
         """Pretty print an NNF formula
 
@@ -91,10 +94,11 @@ class Encoding():
 
 
 
-
+# simplifies the creation of equivalence relations
 def iff(A, B):
     return (A|B.negate()) & (B|A.negate())
 
+# initializes the atoms for either guess or code var
 def init_code(type_of):
     pos_grid = []
     for loc in range(CODE_LENGTH):
