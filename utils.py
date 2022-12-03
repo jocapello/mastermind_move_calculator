@@ -42,7 +42,8 @@ class Encoding():
     def solve(self, variables = None):
         self.theory = self.compile()
         return self.theory.solve()
-    # pretty print function migrated from the bauhaus source code
+
+    # pretty print function migrated from the bauhaus source code for debug purposes
     def pprint(self, formula, solution = None, var_level=False):
         """Pretty print an NNF formula
 
@@ -98,7 +99,7 @@ class Encoding():
 def iff(A, B):
     return (A|B.negate()) & (B|A.negate())
 
-# initializes the atoms for either guess or code var
+# initializes the atoms for either guess or code variables
 def init_code(type_of):
     pos_grid = []
     for loc in range(CODE_LENGTH):
@@ -108,26 +109,21 @@ def init_code(type_of):
         pos_grid.append(col_grid)
     return pos_grid
 
-def init_loc_peg(type_of):
-    grid = []
-    for loc in range(CODE_LENGTH):
-        grid.append(Var(f'{type_of}_{loc}'))
-    return grid
-
+# initializes the atoms for either red or white peg variables
 def init_peg(type_of):
     grid = []
     for num in range(CODE_LENGTH+1):
         grid.append(Var(f'{type_of}_{num}'))
     return grid
 
-
+# returns a list of equivilent relations between elements of two lists of the same size
 def equiv_label(labels, lst):
     grid = []
     for i in range(len(labels)):
         grid.append(iff(labels[i], lst[i]))
     return grid
 
-
+# greates a list of constraints that restrict each code/guess location to only 1 color
 def set_code_constraints(grid):
     constraints = []
     
@@ -142,6 +138,7 @@ def set_code_constraints(grid):
         
     return constraints
 
+# retrns a list of constraints that restrict the the number of red/white pegs to one number
 def set_num_constraints(grid):
     constraints = []
     
@@ -154,20 +151,14 @@ def set_num_constraints(grid):
         
     return constraints
     
-
+# returns the variable corresponding to a number
 def set_num_state(num, grid):
-    f = true
-    
     for n, numc in enumerate(grid):
         if n == num:
+            return numc
+    return grid[0]
 
-        
-            f &= numc
-        
-    return f
-
-
-
+# returns the constraint that discribes the code/guess sequence
 def set_code_state(code, grid):
     f = true
     for x, color in enumerate(code):
@@ -176,13 +167,7 @@ def set_code_state(code, grid):
                 f &= grid[x][y]
     return f
 
-def set_peg_state(pegs, grid):
-    f = true
-    for x, truth in enumerate(pegs):
-        grid[x] == truth
-    return f
-
-
+# creates a CODE_LENGTH length array of constraints that describes whether a location contains the same color for both the code and the guess
 def get_red(C, G):
     grid = []
     for loc in range(CODE_LENGTH):
@@ -192,7 +177,8 @@ def get_red(C, G):
         grid.append(f)
     return grid
 
-
+# creates a CODE_LENGTH length array of constraints that describes whether a location in the guess
+# contains a color that is present in another location in the code(aka flagged for potentially being a white peg)
 def get_white(C, G, R):
     grid = []
     for loc in range(CODE_LENGTH):
@@ -203,7 +189,7 @@ def get_white(C, G, R):
         grid.append(f)
     return grid
 
-
+# creates a formula that is equivalent to whether exactly 'isnum' formulas in a given list of formulas will evaluate to true
 def count_num(lst, isnum):
     if isnum == 0:
         f = true
@@ -216,13 +202,14 @@ def count_num(lst, isnum):
             f |= l & count_num(lst[:i], 0) & count_num(lst[i+1:], isnum-1)
         return f
 
-
+# returns a (CODE_LENGTH+1) list describing the number of true statements in a CODE_LENGTH size list, eg. [F, F, T, F, F] represents 2
 def count_list(lst):
     grid = []
     for num in range(CODE_LENGTH+1):
         grid.append(count_num(lst, num))
     return grid
 
+# compares 2 number representing lists and returns a list of constraints that is equivilent to the list that represents the lower number
 def min_count(lst1, lst2):
     grid = []
     for num in range(CODE_LENGTH+1):
@@ -235,6 +222,7 @@ def min_count(lst1, lst2):
         grid.append(f1 | f2)
     return grid
 
+# compares 2 number representing lists and returns a list of constraints that is equivilent to the list that represents the higher number
 def max_count(lst1, lst2):
     grid = []
     for num in range(CODE_LENGTH+1):
@@ -246,22 +234,23 @@ def max_count(lst1, lst2):
             f2 &= lst1[higher_num].negate()
         grid.append(f1 | f2)
     return grid
+
+# compares 2 lists and returns true if the two lists are equivilent
 def equiv_lists(lst1, lst2):
     f = true
     for num in range(CODE_LENGTH+1):
         f &= iff(lst1[num], lst2[num])
     return f
 
+# compares 2 number representing lists and returns true if the two lists are equivelent
+# more efficient than equiv_lists as it can assume only one formula is true in each list
 def equiv_count_lists(lst1, lst2):
     f = false
     for num in range(CODE_LENGTH+1):
         f |= (lst1[num] & lst2[num])
     return f
             
-
-
-
-
+# takes in the flagged red peg and white peg locations and counts them, taking care of edge cases like two locations flagged white peg for the same location in the code
 def list_total(R, W, C, G):
     R_count = count_list(R)
     W_true = [false for i in range(CODE_LENGTH)]
@@ -275,53 +264,40 @@ def list_total(R, W, C, G):
     W_count = count_list(W_true)
     return R_count, W_count
 
+# creates an encoding containing all the game rule constraints before any game states are added
 def get_game_constraints(C, G, Rn, Wn):
     T = Encoding()
 
-
     #this is the code proposition
     T.add_constraint_list(set_code_constraints(C))
+
     #this is the guess proposition
     T.add_constraint_list(set_code_constraints(G))
 
 
-
     #number of red pegs
-
     T.add_constraint_list(set_num_constraints(Rn))
-    #number of white pegs
 
+    #number of white pegs
     T.add_constraint_list(set_num_constraints(Wn))
 
 
-
+    # flagged red location constraints
     Rc = get_red(C, G)
-    # T.add_constraint_list(equiv_label(Rl, Rc))
-    #Rl = Rc
-    # print(R.__repr__())
 
-
+    # flagged white location constraints
     Wc = get_white(C, G, Rc)
-    # print(W.__repr__())
 
 
-
-    # T.add_constraint_list(equiv_label(Wl, Wc))
-    #Wl = Wc
-
-
-
-
-
+    # get number of peg constraints
     R_count, W_count = list_total(Rc, Wc, C, G)
 
 
+    # create equivelence relations between the number of peg variables and the number of peg constraints
     R_e = equiv_label(Rn, R_count)
     W_e = equiv_label(Wn, W_count)
-
     T.add_constraint_list(R_e)
     T.add_constraint_list(W_e)
 
-    
-
+    #return compiled ruleset
     return T.compile()
