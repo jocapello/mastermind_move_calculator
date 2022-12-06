@@ -1,0 +1,69 @@
+First-Order Extension
+
+Using predicate logic, the code and guess variables at each location could be converted to instead be functions of both
+locations and colours. This would allow us to use quantifiers to check functions of matching locations with matching 
+colours without the use of countless And / Or statements, reducing the overall size and complexity of the model. 
+
+Using quantifiers would also replace all counting functions that employ long And / Or chains that end up slowing our model
+down tremendously. The universe of discource would be: {Colours}U{Locations}U{Number_of}
+
+Predicate logic functions:
+
+Wherever a function takes in L(location), it will return false if an element not in {location} is entered. 
+# Given default rules, {Locations} = {Loc_0,Loc_1,Loc_2,Loc_3}
+Wherever a function takes in C(colour), it will return false if an element not in {colour} is entered. 
+# Given default rules, {Colours} = {Red, Blue, Yellow, White, Purple, Green}
+Wherever a function takes in N(number_of), it will return false if an element not in {Number_of} is entered. 
+# Given default rules, {Number_of} = {0,1,2,3,4}
+
+M_c = M_c(L,C) # Master_code, where L = location, C = colour
+# M_c is the code masters code. It consists in default rules as a sequence of 4 pegs of any combination of the colours,
+# and in our case can be either specified by the user or randomly generated. 
+G = G(L,C) # Guess, where L = location, C = colour
+# G is the guess that a user inputs. In the standard game there are typically between 8-13 allowable guesses 
+# before the code master ends up winning the game. 
+
+red_peg = red_peg(L) # Corresponding to the location where a red pegs location has been flagged
+# red_peg is a list that would contain the locations where a red peg has been flagged. A location being flagged 
+# refers to a function that checks if the colour of a peg at the index of a guess matches that of the code masters code. 
+white_peg = white_peg(L) # Corresponding to the location where a white pegs location has been flagged
+# Even if a white peg location is flagged, it doesn't necessarily have a white peg there (i.e. a red peg is there instead)
+# white_peg's are flagged similairily to red_peg but only if there is a colour that corresponds to a colour the code 
+# master used that is also in the guess sequence. There are edge cases where a peg is flagged more times than it should 
+# be, and due to limitations of the logical classes we must create a work around to detect these edge cases which will 
+# be further explored in the comming predicate statements. 
+
+∀l.(red_peg(l) ⇔ ∃c.(G(l,c) ^ M_c(l,c)))
+# This statement refers to the fact that for all locations a red_peg is specified, there exists a colour 
+∀l.(white_peg(l) ⇔ ∃c.∃l2.(~red_peg(l) ^ ~red_peg(l2) ^ G(l,c) ^ M_c(l2,c)))
+# This statement refers to the fact that for all locations a white_peg is specified, there does not exist a red peg at
+# the same location, then we check there isnt a red peg at any other locations in the code because red pegs take priority, 
+# and then that there exists a guess and location which have matching colours but not locations
+
+red_peg_number = red_peg_number(N) # Is true when there are N number of red pegs
+# Returns the actual number of red pegs by counting the number of available
+white_peg_number = white_peg_number(N) # Is true when there are N number of white pegs
+# Note again, white_peg_number does not nessesarily match the number of elements white_peg(L) is true for
+# white_peg_number returns the actual number of white pegs after counting and checking for duplicates that are caused in
+# the initial white_peg function. We cannot impliment this over top of white_peg as we cannot count the available white
+# pegs before constraints are narrowed. 
+
+∀n.(red_peg_number(n) ⇔ ∃ₙl.(red_peg(l))) # ∃ₙ Refers to there exists exactly n to replace the count function 
+# counts the number of red pegs by stating that red_peg_number(n) is true iff there exists exactly n locations that are flagged for being a red peg.
+
+# For this next function, a few helper functions will be needed:
+# comparison function >, <, = will only compare two variables of the same type(L, C, N) and will return false for all other cases
+# eg. let l, l2 be elements of {location}. l2 < 1 means that l2 is a location that precedes l
+∀n.(white_peg_number(n) ⇔ ∃ₙl.∃c.(∀n2.(∃ₙ₂l2.(white_peg(l2) ^ G(l2, c) ^ (l2 < l)) → ∃n3.((n3 > n2) ^ ∃ₙ₃l2.(M_c(l2, c) ^ ~red_peg(l2)))) & (white_peg(l) ^ G(l, c)))
+# counts the number of white pegs
+# for any n, white_peg_number(n) is only true if there exists exactly n locations l where at this location l, there exists a color c where:
+# ∀n2.(∃ₙ₂l2.(white_peg(l2) ^ G(l2, c) ^ (l2 < l)) → ∃n3.((n3 > n2) ^ ∃ₙ₃l2.(M_c(l2, c) ^ ~red_peg(l2))))
+# meaning that for all n2, if there are n2 white pegs that correspond to color c at locations before l, (∃ₙ₂l2.(white_peg(l2) ^ G(l2, c) ^ (l2 < l))), then
+# there are numbers larger than n2 that correspond to the number of locations where the code at that location is color c and there are no red pegs at that location (∃n3.((n3 > n2) ^ ∃ₙ₃l2.(M_c(l2, c) ^ ~red_peg(l2))))
+# this only evaluates to true if, given a location l and a color c, that there are more locations in the code with color c, that are also not already used for a red peg, than there are white pegs corresponding to the color c before the given location
+# by anding this with (white_peg(l) ^ G(l, c)) which checks if the location l is flagged for a white peg for the color c, we get that the whole statement is only true if:
+# there are enough locations in the code with color c to accomidate for a white peg flagged at location l with color c.
+# putting everything together, the statement states that white_peg_number(n) is only true if there are n locations that are flagged as a white peg for any color where the flagged white peg can also be accomidated by the code.
+# the goal of this overcomplicated constraint is to make sure that in edge cases like code = [r, b, g, r] and guess = [r, r, r, y], white pegs are only counted for one of the three rs in the guess, as only one r is available in the code that has not already been flagged as red.
+
+
